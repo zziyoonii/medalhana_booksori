@@ -6,16 +6,7 @@ import ReadingGroupSection from '../components/ReadingGroupSection';
 import PromotionBanner from '../components/PromotionBanner';
 import PopularBooksSection from '../components/PopularBooksSection';
 
-interface Library {
-  id: number;
-  name: string;
-  address: string;
-  distance: number;
-  phone: string;
-  hours: string;
-  status: string;
-  type?: string;
-}
+// Library 인터페이스 제거 (사용하지 않음)
 
 const PageContainer = styled.div`
   min-height: 100vh;

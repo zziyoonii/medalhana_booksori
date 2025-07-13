@@ -282,16 +282,7 @@ const LibraryStats = styled.div`
   border-bottom: 1px solid #eee;
 `;
 
-const ActionButtons = styled.div`
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: center;
-  }
-`;
+// ActionButtons 스타일드 컴포넌트 제거 (사용하지 않음)
 
 const ReserveButton = styled.button<{ available: boolean }>`
   padding: 8px 15px;
@@ -645,7 +636,7 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
   };
 
   // 검색 수행
-  const performSearch = async (query: string) => {
+  const performSearch = React.useCallback(async (query: string) => {
     setLoading(true);
     setHasSearched(true);
     setApiError('');
@@ -685,7 +676,7 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedRegion, libraries]);
 
   // 더미 검색 결과 생성
   const getDummySearchResults = (query: string): Book[] => {
@@ -836,7 +827,7 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
         onExternalSearchComplete();
       }
     }
-  }, [externalSearchQuery, onExternalSearchComplete]);
+  }, [externalSearchQuery, onExternalSearchComplete, performSearch]);
 
   // 부모에서 전달받은 지역 정보 동기화
   useEffect(() => {

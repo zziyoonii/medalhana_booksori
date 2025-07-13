@@ -1,0 +1,20 @@
+import React from 'react';
+import styled from 'styled-components';
+import MainPage from './pages/MainPage';
+
+const AppContainer = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0;
+  margin: 0;
+`;
+
+function App() {
+  return (
+    <AppContainer>
+      <MainPage />
+    </AppContainer>
+  );
+}
+
+export default App; 

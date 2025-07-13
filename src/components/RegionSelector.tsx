@@ -2,100 +2,51 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { LibraryAPIService } from '../services/LibraryAPI';
 
-const RegionContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 25px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border: 2px solid #e9ecef;
+const RegionSelectorContainer = styled.div`
+  margin-bottom: 20px;
 `;
 
-const RegionTitle = styled.h3`
-  font-size: 22px;
-  color: #2c3e50;
-  margin: 0;
-  text-align: center;
-  font-weight: 600;
-`;
-
-const RegionInputRow = styled.div`
+const RegionInputContainer = styled.div`
   display: flex;
-  gap: 15px;
-  align-items: center;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    
-    button {
-      width: 100%;
-      min-height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-  }
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 `;
 
 const RegionInput = styled.input`
   flex: 1;
-  padding: 16px 18px;
+  min-width: 250px;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
   font-size: 16px;
-  border: 2px solid #e9ecef;
-  border-radius: 10px;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.3s;
   
   &:focus {
-    outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
   }
   
   &::placeholder {
-    color: #999;
-    font-size: 15px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 14px 16px;
-    font-size: 15px;
-    border-radius: 8px;
-    
-    &::placeholder {
-      font-size: 14px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    padding: 12px 14px;
-    font-size: 15px;
-    
-    &::placeholder {
-      font-size: 14px;
-    }
+    color: #666;
   }
 `;
 
 const RegionButton = styled.button`
+  padding: 12px 24px;
   background: var(--primary-color);
   color: white;
   border: none;
-  padding: 15px 30px;
-  font-size: 18px;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 600;
-  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
   white-space: nowrap;
-  min-width: 150px;
   
   &:hover {
-    background: #3a7538;
+    background: #45a049;
     transform: translateY(-2px);
   }
   
@@ -106,45 +57,52 @@ const RegionButton = styled.button`
   }
 `;
 
-const StatusMessage = styled.div`
-  text-align: center;
-  font-size: 16px;
-  padding: 15px;
+const StatusMessage = styled.div<{ isError?: boolean }>`
+  padding: 12px 16px;
   border-radius: 8px;
-  background: #e3f2fd;
-  color: #1976d2;
+  font-size: 14px;
   font-weight: 500;
+  margin-bottom: 16px;
+  background: ${props => props.isError ? '#fff3cd' : '#d4edda'};
+  color: ${props => props.isError ? '#856404' : '#155724'};
+  border: 1px solid ${props => props.isError ? '#ffeaa7' : '#c3e6cb'};
 `;
 
-const ErrorMessage = styled.div`
-  color: #d32f2f;
-  font-size: 16px;
-  text-align: center;
-  padding: 15px;
-  background: #ffebee;
-  border-radius: 8px;
-  border-left: 4px solid #d32f2f;
+const QuickRegionButtons = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 `;
 
-const GuideText = styled.div`
-  text-align: center;
+const QuickButton = styled.button`
+  padding: 8px 16px;
+  background: white;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: var(--primary-color);
+    color: white;
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
   font-size: 16px;
   color: #666;
-  line-height: 1.5;
 `;
 
-interface Library {
-  id: number;
-  name: string;
-  address: string;
-  distance: number;
-  phone: string;
-  hours: string;
-  status: string;
-}
-
 interface RegionSelectorProps {
-  onLibrariesUpdate: (libraries: Library[]) => void;
+  onLibrariesUpdate: (libraries: any[]) => void;
   selectedRegion: string;
   onRegionUpdate: (region: string) => void;
 }
@@ -156,33 +114,100 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
 }) => {
   const [regionInput, setRegionInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [isError, setIsError] = useState(false);
   
-  // 경기데이터드림 API 서비스 인스턴스 생성
+  // API 서비스 인스턴스 생성
   const libraryAPI = new LibraryAPIService({
     baseURL: 'https://openapi.gg.go.kr',
     apiKey: process.env.REACT_APP_GYEONGGI_API_KEY || 'demo_key'
   });
 
+  // 인기 지역 버튼
+  const popularRegions = ['수원시', '성남시', '고양시', '부천시', '안양시', '용인시'];
+
+  // 지역별 더미 도서관 데이터 생성
+  const generateDummyLibraries = (region: string) => {
+    const regionLower = region.toLowerCase();
+    
+    if (regionLower.includes('수원')) {
+      return [
+        { id: 1, name: '수원시립중앙도서관', address: '경기 수원시 영통구 광교로 183', phone: '031-228-4300', distance: 1.2, hours: '09:00-22:00', status: '운영중' },
+        { id: 2, name: '경기도립중앙도서관', address: '경기 수원시 영통구 월드컵로 235', phone: '031-249-4800', distance: 0.8, hours: '09:00-18:00', status: '운영중' },
+        { id: 3, name: '영통구립도서관', address: '경기 수원시 영통구 영통동 999-1', phone: '031-228-4350', distance: 1.5, hours: '09:00-20:00', status: '운영중' }
+      ];
+    } else if (regionLower.includes('성남')) {
+      return [
+        { id: 1, name: '성남시립중앙도서관', address: '경기 성남시 분당구 양현로 346', phone: '031-729-4600', distance: 2.5, hours: '09:00-18:00', status: '운영중' },
+        { id: 2, name: '분당구립정자도서관', address: '경기 성남시 분당구 정자동 178-1', phone: '031-729-4650', distance: 2.8, hours: '09:00-20:00', status: '운영중' },
+        { id: 3, name: '서현작은도서관', address: '경기 성남시 분당구 서현동 271-3', phone: '031-729-4670', distance: 3.1, hours: '10:00-18:00', status: '운영중' }
+      ];
+    } else if (regionLower.includes('고양')) {
+      return [
+        { id: 1, name: '고양시립중앙도서관', address: '경기 고양시 덕양구 고양대로 1955', phone: '031-8075-9300', distance: 4.2, hours: '09:00-18:00', status: '운영중' },
+        { id: 2, name: '일산동구립도서관', address: '경기 고양시 일산동구 백석동 1256', phone: '031-8075-9350', distance: 4.5, hours: '09:00-20:00', status: '운영중' },
+        { id: 3, name: '백석작은도서관', address: '경기 고양시 일산동구 백석동 1234-5', phone: '031-8075-9380', distance: 4.8, hours: '10:00-18:00', status: '운영중' }
+      ];
+    } else if (regionLower.includes('부천')) {
+      return [
+        { id: 1, name: '부천시립중앙도서관', address: '경기 부천시 원미구 길주로 1', phone: '032-625-4700', distance: 3.1, hours: '09:00-18:00', status: '운영중' },
+        { id: 2, name: '원미구립도서관', address: '경기 부천시 원미구 중동 1033-3', phone: '032-625-4750', distance: 3.4, hours: '09:00-20:00', status: '운영중' },
+        { id: 3, name: '중동작은도서관', address: '경기 부천시 원미구 중동 1178-1', phone: '032-625-4780', distance: 3.7, hours: '10:00-18:00', status: '운영중' }
+      ];
+    } else if (regionLower.includes('안양')) {
+      return [
+        { id: 1, name: '안양시립중앙도서관', address: '경기 안양시 만안구 문예로 30', phone: '031-389-0800', distance: 3.8, hours: '09:00-22:00', status: '운영중' },
+        { id: 2, name: '만안구립도서관', address: '경기 안양시 만안구 안양동 678-49', phone: '031-389-0850', distance: 4.1, hours: '09:00-20:00', status: '운영중' },
+        { id: 3, name: '안양동작은도서관', address: '경기 안양시 만안구 안양동 123-45', phone: '031-389-0880', distance: 4.4, hours: '10:00-18:00', status: '운영중' }
+      ];
+    } else if (regionLower.includes('용인')) {
+      return [
+        { id: 1, name: '용인시립중앙도서관', address: '경기 용인시 처인구 중부대로 1199', phone: '031-324-4800', distance: 4.8, hours: '09:00-18:00', status: '운영중' },
+        { id: 2, name: '수지구립도서관', address: '경기 용인시 수지구 수지동 1234-1', phone: '031-324-4850', distance: 5.1, hours: '09:00-20:00', status: '운영중' },
+        { id: 3, name: '기흥구립도서관', address: '경기 용인시 기흥구 구갈동 567-8', phone: '031-324-4880', distance: 5.4, hours: '09:00-20:00', status: '운영중' }
+      ];
+    } else {
+      // 동 단위 처리
+      if (regionLower.includes('동')) {
+        const cityName = region.replace('동', '');
+        return [
+          { id: 1, name: `${cityName}동 주민센터 도서관`, address: `경기도 ${cityName}동 중앙로 123`, phone: '031-123-4567', distance: 0.5, hours: '09:00-18:00', status: '운영중' },
+          { id: 2, name: `${cityName}동 구민회관 도서관`, address: `경기도 ${cityName}동 복합문화센터 2층`, phone: '031-234-5678', distance: 0.8, hours: '10:00-20:00', status: '운영중' },
+          { id: 3, name: `${cityName}동 작은도서관`, address: `경기도 ${cityName}동 주택가 내 작은도서관`, phone: '031-345-6789', distance: 1.2, hours: '10:00-18:00', status: '운영중' }
+        ];
+      }
+      
+      // 기본 도서관
+      return [
+        { id: 1, name: `${region} 중앙도서관`, address: `경기도 ${region} 중앙로 123`, phone: '031-123-4567', distance: 1.0, hours: '09:00-18:00', status: '운영중' },
+        { id: 2, name: `${region} 시립도서관`, address: `경기도 ${region} 시청로 456`, phone: '031-234-5678', distance: 1.5, hours: '09:00-20:00', status: '운영중' },
+        { id: 3, name: `${region} 작은도서관`, address: `경기도 ${region} 문화로 789`, phone: '031-345-6789', distance: 2.0, hours: '10:00-18:00', status: '운영중' }
+      ];
+    }
+  };
+
   const handleRegionSearch = async () => {
     if (!regionInput.trim()) {
-      setError('지역을 입력해주세요.');
+      setStatusMessage('지역을 입력해주세요.');
+      setIsError(true);
       return;
     }
 
     setLoading(true);
-    setError('');
+    setIsError(false);
+    setStatusMessage('');
     
     try {
+      setStatusMessage('📍 경기데이터드림 API에서 도서관 정보를 검색하고 있습니다...');
+      
       // 실제 경기데이터드림 API 호출
       const apiLibraries = await libraryAPI.getLibraries();
       
-      console.log('API에서 받은 도서관 데이터:', apiLibraries); // 디버깅
+      console.log('API에서 받은 도서관 데이터:', apiLibraries);
       
       // 주소 기반 필터링 - 더 유연한 매칭
       const filteredLibraries = apiLibraries
         .filter(lib => {
-          // 주소에서 시/군/구 추출하여 매칭
           const addressKeywords = regionInput.split(' ').filter(keyword => keyword.length > 0);
           const searchText = regionInput.toLowerCase();
           const libraryText = (lib.address + ' ' + lib.name).toLowerCase();
@@ -192,7 +217,16 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
             libraryText.includes(keyword.toLowerCase())
           ) || libraryText.includes(searchText);
         })
-        .map((lib, index) => ({
+        .slice(0, 10); // 최대 10개 결과만 표시
+
+      console.log('필터링된 도서관:', filteredLibraries);
+      console.log('입력된 지역:', regionInput);
+      
+      if (filteredLibraries.length > 0) {
+        setStatusMessage(`✅ 실제 API에서 ${filteredLibraries.length}개의 도서관을 찾았습니다.`);
+        
+        // API 결과를 표준 포맷으로 변환
+        const formattedResults = filteredLibraries.map((lib, index) => ({
           id: index + 1,
           name: lib.name,
           address: lib.address,
@@ -201,39 +235,39 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
           hours: lib.hours,
           status: '운영중'
         }));
-
-      console.log('필터링된 도서관:', filteredLibraries); // 디버깅
-      console.log('입력된 지역:', regionInput); // 디버깅
-
-      // 필터링된 결과가 없거나 적은 경우 더 많은 도서관 표시
-      const finalLibraries = filteredLibraries.length > 0 
-        ? filteredLibraries 
-        : apiLibraries.map((lib, index) => ({
-            id: index + 1,
-            name: lib.name,
-            address: lib.address,
-            distance: lib.distance,
-            phone: lib.phone,
-            hours: lib.hours,
-            status: '운영중'
-          }));
-
-      console.log('최종 도서관 목록:', finalLibraries); // 디버깅
-      
-      onLibrariesUpdate(finalLibraries);
-      onRegionUpdate(regionInput);
-      
-      // 성공 메시지 표시를 위한 간단한 알림
-      if (finalLibraries.length > 0) {
-        console.log(`✅ ${finalLibraries.length}개의 도서관을 찾았습니다!`);
+        
+        onLibrariesUpdate(formattedResults);
+        onRegionUpdate(regionInput);
+      } else {
+        setStatusMessage('⚠️ API에서 해당 지역의 도서관을 찾을 수 없어 샘플 데이터를 표시합니다.');
+        setIsError(false);
+        
+        // 더미 데이터로 대체
+        const dummyLibraries = generateDummyLibraries(regionInput);
+        onLibrariesUpdate(dummyLibraries);
+        onRegionUpdate(regionInput);
       }
       
     } catch (error) {
-      console.error('도서관 검색 중 오류 발생:', error);
-      setError('도서관 검색 중 오류가 발생했습니다.');
+      console.error('도서관 검색 실패:', error);
+      setStatusMessage('❌ API 호출에 실패했습니다. 샘플 데이터를 표시합니다.');
+      setIsError(true);
+      
+      // 더미 데이터로 대체
+      const dummyLibraries = generateDummyLibraries(regionInput);
+      onLibrariesUpdate(dummyLibraries);
+      onRegionUpdate(regionInput);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleQuickRegionSelect = (region: string) => {
+    setRegionInput(region);
+    // 자동으로 검색 실행
+    setTimeout(() => {
+      handleRegionSearch();
+    }, 100);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -243,47 +277,45 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
   };
 
   return (
-    <RegionContainer>
-      <RegionTitle>📍 지역 선택</RegionTitle>
+    <RegionSelectorContainer>
+      <QuickRegionButtons>
+        {popularRegions.map((region) => (
+          <QuickButton
+            key={region}
+            onClick={() => handleQuickRegionSelect(region)}
+            disabled={loading}
+          >
+            {region}
+          </QuickButton>
+        ))}
+      </QuickRegionButtons>
       
-      <GuideText>
-        거주하시는 지역을 입력하시면 해당 지역 도서관들의<br/>
-        도서 대출 현황을 확인할 수 있습니다.
-        <br/><br/>
-        <strong>💡 지역 검색 팁:</strong><br/>
-        • 시 이름만 입력하셔도 됩니다 (예: 수원, 성남, 고양)<br/>
-        • 전체 도서관을 보려면 "경기"를 입력하세요
-      </GuideText>
-      
-      <RegionInputRow>
+      <RegionInputContainer>
         <RegionInput
           type="text"
-          placeholder="지역명 입력 (예: 수원시, 성남시, 부천시)"
+          placeholder="지역을 입력하세요 (예: 수원시, 성남시, 광교동)"
           value={regionInput}
           onChange={(e) => setRegionInput(e.target.value)}
           onKeyPress={handleKeyPress}
-        />
-        <RegionButton 
-          onClick={handleRegionSearch}
           disabled={loading}
-        >
-          {loading ? '검색중...' : '🔍 도서관 찾기'}
+        />
+        <RegionButton onClick={handleRegionSearch} disabled={loading}>
+          {loading ? '검색 중...' : '🔍 검색'}
         </RegionButton>
-      </RegionInputRow>
-      
-      {selectedRegion && (
-        <StatusMessage>
-          ✅ <strong>{selectedRegion}</strong> 지역의 도서관 정보를 불러왔습니다!<br/>
-          위에서 각 도서관별 대출 현황을 확인해보세요 📚
+      </RegionInputContainer>
+
+      {statusMessage && (
+        <StatusMessage isError={isError}>
+          {statusMessage}
         </StatusMessage>
       )}
-      
-      {error && (
-        <ErrorMessage>
-          ⚠️ {error}
-        </ErrorMessage>
+
+      {loading && (
+        <LoadingSpinner>
+          📍 도서관 정보를 검색하고 있습니다...
+        </LoadingSpinner>
       )}
-    </RegionContainer>
+    </RegionSelectorContainer>
   );
 };
 

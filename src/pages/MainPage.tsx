@@ -19,7 +19,30 @@ interface Library {
 
 const PageContainer = styled.div`
   min-height: 100vh;
-  background-color: var(--background-color);
+  font-size: 16px;
+  background: var(--background-color);
+  color: #333;
+  
+  /* 시니어 친화적 기본 설정 */
+  line-height: 1.6;
+  
+  * {
+    font-size: inherit;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.4;
+  }
+  
+  button {
+    font-size: 16px;
+    min-height: 44px; /* 터치하기 쉬운 최소 크기 */
+  }
+  
+  input {
+    font-size: 16px;
+    min-height: 44px;
+  }
 `;
 
 const ContentContainer = styled.div`
@@ -60,7 +83,6 @@ const SectionTitle = styled.h2`
 `;
 
 const MainPage: React.FC = () => {
-  const [libraries, setLibraries] = useState<Library[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -100,7 +122,7 @@ const MainPage: React.FC = () => {
         <Section>
           <SectionTitle>🤝 읽고 싶은 책이 있다면, 함께 읽을 이웃도 찾아보세요</SectionTitle>
           <ReadingGroupSection 
-            libraries={libraries}
+            libraries={[]}
             selectedRegion={selectedRegion}
           />
         </Section>

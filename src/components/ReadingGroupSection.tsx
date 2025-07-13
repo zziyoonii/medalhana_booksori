@@ -1403,14 +1403,6 @@ const ReadingGroupSection: React.FC<ReadingGroupSectionProps> = ({ libraries, se
           👥 목록 {selectedRegion && `(${selectedRegion})`}
         </TabButton>
         
-        {/* 본인인증 탭 - 항상 표시 */}
-        <TabButton 
-          active={activeTab === 'auth'} 
-          onClick={() => handleTabChange('auth')}
-        >
-          {isAuthenticated ? '✅ 인증완료' : '🔒 본인인증'}
-        </TabButton>
-        
         {/* 인증 후에만 표시되는 탭들 */}
         {isAuthenticated && (
           <>
@@ -1434,6 +1426,14 @@ const ReadingGroupSection: React.FC<ReadingGroupSectionProps> = ({ libraries, se
             </TabButton>
           </>
         )}
+        
+        {/* 본인인증 탭 - 항상 표시 */}
+        <TabButton 
+          active={activeTab === 'auth'} 
+          onClick={() => handleTabChange('auth')}
+        >
+          {isAuthenticated ? '✅ 인증완료' : '🔒 본인인증'}
+        </TabButton>
       </TabContainer>
 
               {activeTab === 'list' && (
@@ -1457,17 +1457,19 @@ const ReadingGroupSection: React.FC<ReadingGroupSectionProps> = ({ libraries, se
           
           {!selectedRegion ? (
             <div className="text-center py-16">
-              <div className="text-6xl mb-6">📍</div>
-              <h3 className="text-xl font-bold text-text mb-3">독서모임을 찾으려면?</h3>
+              <h3 className="text-xl font-bold text-text mb-3" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '48px' }}>📍</span>
+                <span>독서모임을 찾으려면?</span>
+              </h3>
               <p className="text-gray-600">
                 위의 "도서 검색" 섹션에서 지역을 선택해주세요!
               </p>
             </div>
           ) : filteredGroups.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-6xl mb-6">👥</div>
-              <h3 className="text-xl font-bold text-text mb-3">
-                {selectedRegion}에는 아직 독서모임이 없어요
+              <h3 className="text-xl font-bold text-text mb-3" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '48px' }}>👥</span>
+                <span>{selectedRegion}에는 아직 독서모임이 없어요</span>
               </h3>
               <p className="text-gray-600 mb-6">
                 새로운 모임을 만들어서 첫 번째 독서모임을 시작해보세요!
@@ -1717,8 +1719,9 @@ const ReadingGroupSection: React.FC<ReadingGroupSectionProps> = ({ libraries, se
           
           {selectedGroupId ? (
             <>
-              <BoardTitle>
-                💬 {filteredGroups.find(g => g.id === selectedGroupId)?.title} 게시판
+              <BoardTitle style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>💬</span>
+                <span>{filteredGroups.find(g => g.id === selectedGroupId)?.title} 게시판</span>
               </BoardTitle>
               <PostList>
                 {boardPosts
@@ -1736,8 +1739,10 @@ const ReadingGroupSection: React.FC<ReadingGroupSectionProps> = ({ libraries, se
                   ))}
                                   {boardPosts.filter(post => post.groupId === selectedGroupId).length === 0 && (
                     <div className="text-center py-16">
-                      <div className="text-6xl mb-6">📝</div>
-                      <h3 className="text-xl font-bold text-text mb-3">아직 게시글이 없어요</h3>
+                      <h3 className="text-xl font-bold text-text mb-3" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '48px' }}>📝</span>
+                        <span>아직 게시글이 없어요</span>
+                      </h3>
                       <p className="text-gray-600 mb-4">
                         모임 참여 후 첫 번째 글을 작성해보세요!
                       </p>
@@ -1747,8 +1752,10 @@ const ReadingGroupSection: React.FC<ReadingGroupSectionProps> = ({ libraries, se
             </>
                       ) : (
               <div className="text-center py-16">
-                <div className="text-6xl mb-6">💬</div>
-                <h3 className="text-xl font-bold text-text mb-3">게시판을 보려면 모임을 선택해주세요!</h3>
+                <h3 className="text-xl font-bold text-text mb-3" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '48px' }}>💬</span>
+                  <span>게시판을 보려면 모임을 선택해주세요!</span>
+                </h3>
                 <p className="text-gray-600 mb-4">
                   목록에서 "게시판" 버튼을 클릭하세요.
                 </p>
@@ -1761,8 +1768,10 @@ const ReadingGroupSection: React.FC<ReadingGroupSectionProps> = ({ libraries, se
          <div>
            {!isAuthenticated ? (
              <div className="text-center py-16">
-               <div className="text-6xl mb-6">🔒</div>
-               <h3 className="text-xl font-bold text-text mb-3">본인인증이 필요해요</h3>
+               <h3 className="text-xl font-bold text-text mb-3" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                 <span style={{ fontSize: '48px' }}>🔒</span>
+                 <span>본인인증이 필요해요</span>
+               </h3>
                <p className="text-gray-600 mb-6">
                  내 모임을 확인하려면 먼저 본인인증을 완료해주세요.
                </p>
@@ -1775,8 +1784,10 @@ const ReadingGroupSection: React.FC<ReadingGroupSectionProps> = ({ libraries, se
              </div>
            ) : joinedGroups.length === 0 ? (
              <div className="text-center py-16">
-               <div className="text-6xl mb-6">📖</div>
-               <h3 className="text-xl font-bold text-text mb-3">참여한 독서모임이 없어요</h3>
+               <h3 className="text-xl font-bold text-text mb-3" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                 <span style={{ fontSize: '48px' }}>📖</span>
+                 <span>참여한 독서모임이 없어요</span>
+               </h3>
                <p className="text-gray-600 mb-6">
                  목록에서 마음에 드는 모임에 참여해보세요!
                </p>
@@ -1789,8 +1800,9 @@ const ReadingGroupSection: React.FC<ReadingGroupSectionProps> = ({ libraries, se
              </div>
            ) : (
              <div>
-               <h3 style={{ marginBottom: '25px', color: '#2c3e50' }}>
-                 📖 내가 참여한 독서모임 ({joinedGroups.length}개)
+               <h3 style={{ marginBottom: '25px', color: '#2c3e50', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                 <span>📖</span>
+                 <span>내가 참여한 독서모임 ({joinedGroups.length}개)</span>
                </h3>
                
                {joinedGroups.map(groupId => {

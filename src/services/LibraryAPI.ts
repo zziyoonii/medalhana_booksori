@@ -257,138 +257,186 @@ export const dummyLibraries = [
   },
   {
     id: '23',
-    name: '풍덕천작은도서관',
-    address: '경기 용인시 수지구 풍덕천동 1167-6',
+    name: '기흥구립도서관',
+    address: '경기 용인시 기흥구 구갈동 567-8',
     phone: '031-324-4880',
-    hours: '10:00-18:00',
-    website: '',
+    hours: '09:00-20:00',
+    website: 'https://www.yonginlib.go.kr/',
     distance: 5.4,
-    coordinates: { lat: 37.328, lng: 127.098 },
-    type: '작은도서관'
+    coordinates: { lat: 37.275, lng: 127.115 },
+    type: '구립도서관'
+  },
+  {
+    id: '23-1',
+    name: '처인도서관',
+    address: '경기 용인시 처인구 금령로 33번길 15',
+    phone: '031-324-4670',
+    hours: '09:00-18:00',
+    website: 'https://www.yonginlib.go.kr/',
+    distance: 5.6,
+    coordinates: { lat: 37.236, lng: 127.200 },
+    type: '공공도서관'
+  },
+  {
+    id: '23-2',
+    name: '서농도서관',
+    address: '경기 용인시 기흥구 서천서로 83',
+    phone: '031-324-4680',
+    hours: '09:00-18:00',
+    website: '',
+    distance: 5.8,
+    coordinates: { lat: 37.241, lng: 127.077 },
+    type: '공공도서관'
+  },
+  {
+    id: '23-3',
+    name: '포곡도서관',
+    address: '경기 용인시 처인구 포곡읍 에버랜드로 860',
+    phone: '031-324-4690',
+    hours: '09:00-18:00',
+    website: 'https://www.yonginlib.go.kr/',
+    distance: 6.0,
+    coordinates: { lat: 37.294, lng: 127.202 },
+    type: '공공도서관'
+  },
+  {
+    id: '23-4',
+    name: '흥덕도서관',
+    address: '경기 용인시 기흥구 흥덕중앙로 120',
+    phone: '031-324-4700',
+    hours: '09:00-18:00',
+    website: 'https://www.yonginlib.go.kr/',
+    distance: 5.2,
+    coordinates: { lat: 37.238, lng: 127.119 },
+    type: '공공도서관'
   },
   
-  // 의정부시 도서관들
+  // 화성시 도서관들
   {
     id: '24',
-    name: '의정부시립중앙도서관',
-    address: '경기 의정부시 체육로 99',
-    phone: '031-828-4800',
+    name: '화성시립중앙도서관',
+    address: '경기 화성시 남양읍 시청로 155',
+    phone: '031-369-6800',
     hours: '09:00-18:00',
-    website: 'https://www.ujblib.go.kr/',
-    distance: 5.3,
-    coordinates: { lat: 37.738, lng: 127.033 },
+    website: 'https://www.hscitylib.go.kr/',
+    distance: 6.2,
+    coordinates: { lat: 37.200, lng: 126.831 },
     type: '공공도서관'
   },
   {
     id: '25',
-    name: '가능동작은도서관',
-    address: '경기 의정부시 가능동 487-3',
-    phone: '031-828-4850',
-    hours: '10:00-18:00',
-    website: '',
-    distance: 5.6,
-    coordinates: { lat: 37.741, lng: 127.038 },
-    type: '작은도서관'
-  },
-  {
-    id: '26',
-    name: '의정부동작은도서관',
-    address: '경기 의정부시 의정부동 195-12',
-    phone: '031-828-4860',
-    hours: '10:00-18:00',
-    website: '',
-    distance: 5.9,
-    coordinates: { lat: 37.744, lng: 127.041 },
-    type: '작은도서관'
+    name: '동탄구립도서관',
+    address: '경기 화성시 동탄면 동탄대로 300',
+    phone: '031-369-6850',
+    hours: '09:00-20:00',
+    website: 'https://www.hscitylib.go.kr/',
+    distance: 6.5,
+    coordinates: { lat: 37.205, lng: 127.078 },
+    type: '구립도서관'
   }
 ];
 
+// 더미 도서 데이터
 export const dummyBooks = [
   {
-    id: '1',
-    title: '디지털 시대의 도서관 경영',
-    author: '김도서',
-    isbn: '9788901234567',
-    publisher: '도서출판사',
-    availability: {
-      '1': { available: true, totalCopies: 3, checkedOut: 1 },
-      '2': { available: false, totalCopies: 2, checkedOut: 2 },
-      '3': { available: true, totalCopies: 4, checkedOut: 0 },
-      '4': { available: true, totalCopies: 2, checkedOut: 1 },
-      '5': { available: false, totalCopies: 1, checkedOut: 1 }
-    }
+    id: 1,
+    title: '82년생 김지영',
+    author: '조남주',
+    publisher: '민음사',
+    isbn: '9788937473722',
+    category: '소설',
+    publishYear: '2016',
+    description: '한국 여성의 현실을 담은 화제의 소설',
+    imageUrl: ''
   },
   {
-    id: '2',
-    title: '경기도 문화와 역사',
-    author: '이문화',
-    isbn: '9788901234568',
-    publisher: '경기출판사',
-    availability: {
-      '1': { available: true, totalCopies: 5, checkedOut: 2 },
-      '2': { available: true, totalCopies: 3, checkedOut: 0 },
-      '3': { available: true, totalCopies: 2, checkedOut: 1 },
-      '4': { available: false, totalCopies: 2, checkedOut: 2 },
-      '5': { available: true, totalCopies: 3, checkedOut: 1 }
-    }
+    id: 2,
+    title: '미드나잇 라이브러리',
+    author: '매트 헤이그',
+    publisher: '인플루엔셜',
+    isbn: '9791197377109',
+    category: '소설',
+    publishYear: '2020',
+    description: '후회와 선택에 관한 철학적 소설',
+    imageUrl: ''
   },
   {
-    id: '3',
-    title: '스마트 시니어 생활 가이드',
-    author: '박시니어',
-    isbn: '9788901234569',
-    publisher: '시니어북스',
-    availability: {
-      '1': { available: false, totalCopies: 2, checkedOut: 2 },
-      '2': { available: true, totalCopies: 4, checkedOut: 1 },
-      '3': { available: true, totalCopies: 3, checkedOut: 0 },
-      '4': { available: true, totalCopies: 1, checkedOut: 0 },
-      '5': { available: true, totalCopies: 2, checkedOut: 0 }
-    }
+    id: 3,
+    title: '사피엔스',
+    author: '유발 하라리',
+    publisher: '김영사',
+    isbn: '9788934972464',
+    category: '인문',
+    publishYear: '2015',
+    description: '인류의 역사를 다룬 베스트셀러',
+    imageUrl: ''
+  },
+  {
+    id: 4,
+    title: '아몬드',
+    author: '손원평',
+    publisher: '창비',
+    isbn: '9788936434267',
+    category: '소설',
+    publishYear: '2017',
+    description: '감정을 느끼지 못하는 소년의 성장 소설',
+    imageUrl: ''
+  },
+  {
+    id: 5,
+    title: '정의란 무엇인가',
+    author: '마이클 샌델',
+    publisher: '김영사',
+    isbn: '9788934942467',
+    category: '철학',
+    publishYear: '2010',
+    description: '정의에 대한 철학적 탐구',
+    imageUrl: ''
   }
 ];
 
-// 더미 독서 모임 데이터
+// 더미 독서모임 데이터
 export const dummyReadingGroups = [
   {
-    id: '1',
-    name: '시니어 문학 동호회',
-    description: '50대 이상을 위한 문학 작품 읽기 모임',
-    meetingDay: '매주 수요일',
-    meetingTime: '14:00-16:00',
-    currentBook: '디지털 시대의 도서관 경영',
-    members: 12,
-    maxMembers: 15,
+    id: 1,
+    name: '시니어 독서 클럽',
+    description: '50-60대를 위한 독서 모임입니다.',
     libraryId: '1',
-    libraryName: '경기도립중앙도서관'
+    libraryName: '경기도립중앙도서관',
+    meetingDate: '2024-01-15',
+    meetingTime: '14:00',
+    maxMembers: 15,
+    currentMembers: 8,
+    bookTitle: '82년생 김지영',
+    bookAuthor: '조남주',
+    category: '소설',
+    difficulty: '쉬움',
+    meetingType: 'library',
+    organizer: '김도서',
+    contact: '010-1234-5678',
+    status: 'active'
   },
   {
-    id: '2',
-    name: '역사 탐구 클럽',
-    description: '우리 지역 역사와 문화에 대해 알아보는 모임',
-    meetingDay: '격주 토요일',
-    meetingTime: '10:00-12:00',
-    currentBook: '경기도 문화와 역사',
-    members: 8,
-    maxMembers: 12,
+    id: 2,
+    name: '역사 탐구 모임',
+    description: '한국사와 세계사를 함께 읽는 모임',
     libraryId: '2',
-    libraryName: '수원시립중앙도서관'
-  },
-  {
-    id: '3',
-    name: '디지털 라이프 모임',
-    description: '디지털 기기 활용법과 스마트한 생활을 배우는 모임',
-    meetingDay: '매주 금요일',
-    meetingTime: '15:00-17:00',
-    currentBook: '스마트 시니어 생활 가이드',
-    members: 15,
-    maxMembers: 20,
-    libraryId: '3',
-    libraryName: '성남시립중앙도서관'
+    libraryName: '수원시립중앙도서관',
+    meetingDate: '2024-01-20',
+    meetingTime: '10:00',
+    maxMembers: 12,
+    currentMembers: 6,
+    bookTitle: '사피엔스',
+    bookAuthor: '유발 하라리',
+    category: '인문',
+    difficulty: '보통',
+    meetingType: 'library',
+    organizer: '박역사',
+    contact: '010-2345-6789',
+    status: 'active'
   }
 ];
 
-// 경기도 공공데이터 API 관련 타입 및 서비스
 export interface LibraryAPIConfig {
   baseURL: string;
   apiKey: string;
@@ -410,6 +458,31 @@ export interface BookSearchParams {
   libraryId?: string;
   startDate?: string;
   endDate?: string;
+  pageNo?: number;
+  pageSize?: number;
+}
+
+export interface BookSearchResult {
+  id: string;
+  title: string;
+  author: string;
+  publisher: string;
+  isbn: string;
+  category: string;
+  publishYear: string;
+  description?: string;
+  imageUrl?: string;
+  loanCount?: number;
+  availability?: LibraryAvailability[];
+}
+
+export interface LibraryAvailability {
+  libraryId: string;
+  libraryName: string;
+  available: boolean;
+  loanable: boolean;
+  reservable: boolean;
+  dueDate?: string;
 }
 
 /**
@@ -449,7 +522,7 @@ export class LibraryAPIService {
         KEY: this.config.apiKey,
         Type: 'json',
         pIndex: '1',
-        pSize: '100'
+        pSize: '500' // 검색 범위 확대
       });
 
       const response = await fetch(`${apiUrl}?${params}`);
@@ -461,13 +534,14 @@ export class LibraryAPIService {
       const data = await response.json();
       
       // 경기데이터드림 API 응답 구조에 맞게 데이터 변환
+      let libraries = [];
       if (data.LibraryStatus && data.LibraryStatus[1].row) {
-        const libraries = data.LibraryStatus[1].row.map((item: any, index: number) => ({
+        libraries = data.LibraryStatus[1].row.map((item: any, index: number) => ({
           id: (index + 1).toString(),
           name: item.LBRRY_NM || '도서관명 없음',
           address: item.REFINE_ROADNM_ADDR || item.REFINE_LOTNO_ADDR || '주소 없음',
           phone: item.TELNO || '전화번호 없음',
-          hours: '09:00-18:00', // 기본 운영시간 (API에서 제공되지 않음)
+          hours: '09:00-18:00', // 기본 운영시간
           website: item.HMPG_ADDR || '',
           distance: Math.round(Math.random() * 5 * 10) / 10, // 임시 거리 계산
           coordinates: {
@@ -476,13 +550,90 @@ export class LibraryAPIService {
           },
           type: '공공도서관'
         }));
-        
-        return libraries;
       }
-      
-      // API 응답이 예상과 다른 경우 더미 데이터 반환
-      console.warn('API 응답 구조가 예상과 다름, 더미 데이터 사용');
-      return dummyLibraries;
+
+      // 용인시 도서관들 수동 추가 (API에서 검색되지 않는 경우 대비)
+      const additionalLibraries = [
+        {
+          id: 'yongin_central',
+          name: '용인시립중앙도서관',
+          address: '경기도 용인시 처인구 중부대로 1199',
+          phone: '031-324-4600',
+          hours: '09:00-18:00',
+          website: 'https://www.yonginlib.go.kr',
+          distance: 1.2,
+          coordinates: { lat: 37.231, lng: 127.208 },
+          type: '공공도서관'
+        },
+        {
+          id: 'giheung_lib',
+          name: '기흥도서관',
+          address: '경기도 용인시 기흥구 기흥로 19',
+          phone: '031-324-4660',
+          hours: '09:00-18:00',
+          website: 'https://www.yonginlib.go.kr',
+          distance: 1.8,
+          coordinates: { lat: 37.275, lng: 127.115 },
+          type: '공공도서관'
+        },
+        {
+          id: 'suji_lib',
+          name: '수지도서관',
+          address: '경기도 용인시 수지구 포은대로 435',
+          phone: '031-324-4650',
+          hours: '09:00-18:00',
+          website: 'https://www.yonginlib.go.kr',
+          distance: 2.1,
+          coordinates: { lat: 37.324, lng: 127.094 },
+          type: '공공도서관'
+        },
+        {
+          id: 'cheoin_lib',
+          name: '처인도서관',
+          address: '경기도 용인시 처인구 금령로 33번길 15',
+          phone: '031-324-4670',
+          hours: '09:00-18:00',
+          website: 'https://www.yonginlib.go.kr',
+          distance: 2.3,
+          coordinates: { lat: 37.236, lng: 127.200 },
+          type: '공공도서관'
+        },
+        {
+          id: 'seongnam_lib',
+          name: '서농도서관',
+          address: '경기도 용인시 기흥구 서천서로 83',
+          phone: '031-324-4680',
+          hours: '09:00-18:00',
+          website: '',
+          distance: 2.5,
+          coordinates: { lat: 37.241, lng: 127.077 },
+          type: '공공도서관'
+        },
+        {
+          id: 'pogok_lib',
+          name: '포곡도서관',
+          address: '경기도 용인시 처인구 포곡읍 에버랜드로 860',
+          phone: '031-324-4690',
+          hours: '09:00-18:00',
+          website: 'https://www.yonginlib.go.kr',
+          distance: 3.2,
+          coordinates: { lat: 37.294, lng: 127.202 },
+          type: '공공도서관'
+        },
+        {
+          id: 'heungdeok_lib',
+          name: '흥덕도서관',
+          address: '경기도 용인시 기흥구 흥덕중앙로 120',
+          phone: '031-324-4700',
+          hours: '09:00-18:00',
+          website: 'https://www.yonginlib.go.kr',
+          distance: 2.8,
+          coordinates: { lat: 37.238, lng: 127.119 },
+          type: '공공도서관'
+        }
+      ];
+
+      return [...libraries, ...additionalLibraries];
       
     } catch (error) {
       console.error('도서관 정보 조회 실패:', error);
@@ -492,27 +643,123 @@ export class LibraryAPIService {
   }
 
   /**
-   * 도서 검색
-   * 실제 API: 도서관정보나루 API 또는 각 도서관별 API
+   * 도서 검색 - 도서관정보나루 API 활용
+   * 실제 API: http://data4library.kr/api/srchBooks
    */
-  async searchBooks(params: BookSearchParams): Promise<any[]> {
+  async searchBooks(params: BookSearchParams): Promise<BookSearchResult[]> {
     try {
-      // 실제 구현 시:
-      // const response = await fetch(`${this.config.baseURL}/books/search`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ ...params, apiKey: this.config.apiKey })
-      // });
-      // const data = await response.json();
-      // return data.result;
+      const apiUrl = 'http://data4library.kr/api/srchBooks';
+      const searchParams = new URLSearchParams({
+        authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
+        title: params.query,
+        pageNo: (params.pageNo || 1).toString(),
+        pageSize: (params.pageSize || 10).toString(),
+        format: 'json'
+      });
+
+      console.log('도서 검색 API 호출:', `${apiUrl}?${searchParams}`);
       
-      // 현재는 더미 데이터 반환
-      return dummyBooks.filter(book => 
-        book.title.includes(params.query) || 
-        book.author.includes(params.query)
-      );
+      const response = await fetch(`${apiUrl}?${searchParams}`);
+      
+      if (!response.ok) {
+        throw new Error(`API 호출 실패: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      console.log('API 응답:', data);
+      
+      // API 응답 구조 확인
+      if (data.response && data.response.docs) {
+        const books: BookSearchResult[] = data.response.docs.map((book: any, index: number) => ({
+          id: book.isbn || `book_${index}`,
+          title: book.bookname || '제목 없음',
+          author: book.authors || '작가 미상',
+          publisher: book.publisher || '출판사 미상',
+          isbn: book.isbn || '',
+          category: book.class_nm || '일반',
+          publishYear: book.publication_year || '2023',
+          description: book.description || '',
+          imageUrl: book.bookImageURL || '',
+          loanCount: parseInt(book.loan_count) || 0
+        }));
+        
+        console.log('변환된 도서 데이터:', books);
+        return books;
+      }
+      
+      // API 응답이 예상과 다른 경우 더미 데이터 반환
+      console.warn('API 응답 구조가 예상과 다름, 더미 데이터 사용');
+      return this.getDummyBooks(params.query);
+      
     } catch (error) {
       console.error('도서 검색 실패:', error);
+      console.log('더미 데이터로 대체합니다.');
+      return this.getDummyBooks(params.query);
+    }
+  }
+
+  /**
+   * 더미 도서 데이터 필터링
+   */
+  private getDummyBooks(query: string): BookSearchResult[] {
+    return dummyBooks
+      .filter(book => 
+        book.title.toLowerCase().includes(query.toLowerCase()) || 
+        book.author.toLowerCase().includes(query.toLowerCase())
+      )
+      .map(book => ({
+        id: book.id.toString(),
+        title: book.title,
+        author: book.author,
+        publisher: book.publisher,
+        isbn: book.isbn,
+        category: book.category,
+        publishYear: book.publishYear,
+        description: book.description,
+        imageUrl: book.imageUrl,
+        loanCount: Math.floor(Math.random() * 100) + 10
+      }));
+  }
+
+  /**
+   * 도서 소장 현황 조회
+   * 실제 API: http://data4library.kr/api/libSrchByBook
+   */
+  async getBookAvailability(isbn: string): Promise<LibraryAvailability[]> {
+    try {
+      const apiUrl = 'http://data4library.kr/api/libSrchByBook';
+      const params = new URLSearchParams({
+        authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
+        isbn: isbn,
+        format: 'json'
+      });
+
+      const response = await fetch(`${apiUrl}?${params}`);
+      
+      if (!response.ok) {
+        throw new Error(`API 호출 실패: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.response && data.response.libs) {
+        const availability: LibraryAvailability[] = data.response.libs.map((lib: any) => ({
+          libraryId: lib.lib.libCode || '',
+          libraryName: lib.lib.libName || '도서관명 없음',
+          available: lib.book.loanAvailable === 'Y',
+          loanable: lib.book.loanAvailable === 'Y',
+          reservable: lib.book.reserveAvailable === 'Y',
+          dueDate: lib.book.returnPlanDate || undefined
+        }));
+        
+        return availability;
+      }
+      
+      return [];
+      
+    } catch (error) {
+      console.error('도서 소장 현황 조회 실패:', error);
       return [];
     }
   }
@@ -609,8 +856,8 @@ export class LibraryAPIService {
 
 // 기본 API 설정 (환경변수에서 로드)
 export const defaultLibraryAPI = new LibraryAPIService({
-  baseURL: process.env.REACT_APP_GYEONGGI_API_URL || 'https://data.gg.go.kr/portal/data/service',
-  apiKey: process.env.REACT_APP_GYEONGGI_API_KEY || 'YOUR_API_KEY_HERE'
+  baseURL: process.env.REACT_APP_GYEONGGI_API_URL || 'https://openapi.gg.go.kr',
+  apiKey: process.env.REACT_APP_GYEONGGI_API_KEY || 'demo_key'
 });
 
 // API 키 설정 가이드
@@ -633,8 +880,9 @@ export const API_SETUP_GUIDE = {
       step: 3,
       title: '환경변수 설정',
       description: '.env 파일에 API 키 추가',
-      code: `REACT_APP_GYEONGGI_API_URL=https://data.gg.go.kr/portal/data/service
-REACT_APP_GYEONGGI_API_KEY=your_api_key_here`
+      code: `REACT_APP_GYEONGGI_API_URL=https://openapi.gg.go.kr
+REACT_APP_GYEONGGI_API_KEY=your_api_key_here
+REACT_APP_LIBRARY_API_KEY=your_library_api_key_here`
     },
     {
       step: 4,
@@ -674,22 +922,45 @@ REACT_APP_GYEONGGI_API_KEY=your_api_key_here`
       ]
     }
   ]
-}; 
+};
 
 // 도서관 정보나루 API 서비스
 const BASE_URL = 'http://data4library.kr/api';
 
 // API 인증키 (실제 인증키로 설정)
-const AUTH_KEY = '651824a6d5a5d765b513f7f8059ef5ffb2ac3c30f15f0114a8764076c8b902b8';
+const AUTH_KEY = process.env.REACT_APP_LIBRARY_API_KEY || '651824a6d5a5d765b513f7f8059ef5ffb2ac3c30f15f0114a8764076c8b902b8';
 
-// 지역 코드 매핑 (경기도 기준)
+// API 승인 상태 확인 함수
+export const checkApiApprovalStatus = async (apiKey: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`https://www.data4library.kr/api/loanItemSrch?authKey=${apiKey}&startDt=2024-01-01&endDt=2024-01-31&pageNo=1&pageSize=1&format=json`);
+    const data = await response.json();
+    
+    // API 키가 승인되지 않은 경우 에러 응답을 받음
+    if (data.error || data.message?.includes('인증키') || data.message?.includes('승인')) {
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('API 승인 상태 확인 중 오류:', error);
+    return false;
+  }
+};
+
+// 지역 코드 매핑 (도서관정보나루 API 기준)
 const REGION_CODES = {
-  '강남구': '31',
-  '서초구': '31', 
-  '수원시': '31',
-  '성남시': '31',
-  '부천시': '31',
-  '전체': '31' // 경기도 전체
+  '강남구': '11',  // 서울특별시
+  '서초구': '11',  // 서울특별시
+  '수원시': '31',  // 경기도
+  '성남시': '31',  // 경기도
+  '부천시': '31',  // 경기도
+  '안양시': '31',  // 경기도
+  '고양시': '31',  // 경기도
+  '용인시': '31',  // 경기도
+  '화성시': '31',  // 경기도
+  '경기도': '31',  // 경기도 전체
+  '전체': '31'     // 경기도 전체 (기본값)
 };
 
 // 연령대 매핑 (50-60대 중심)
@@ -760,13 +1031,13 @@ export const fetchPopularBooks = async (
     // API 응답 데이터 구조에 맞게 변환
     const books: PopularBookData[] = data.response.docs?.map((book: any, index: number) => ({
       id: book.isbn || `book_${index}`,
-      title: book.title || '제목 없음',
-      author: book.author || '작가 미상',
+      title: book.bookname || '제목 없음',
+      author: book.authors || '작가 미상',
       publisher: book.publisher || '출판사 미상',
       isbn: book.isbn || '',
-      loanCount: book.loanCount || 0,
-      category: book.category || '일반',
-      publishYear: book.publishYear || '2023'
+      loanCount: parseInt(book.loan_count) || 0,
+      category: book.class_nm || '일반',
+      publishYear: book.publication_year || '2023'
     })) || [];
     
     return books;
@@ -838,6 +1109,26 @@ const getFallbackPopularBooks = (): PopularBookData[] => {
 };
 
 /**
+ * 도서 검색 API 함수 (외부에서 직접 호출용)
+ */
+export const searchBooksAPI = async (
+  query: string,
+  pageNo: number = 1,
+  pageSize: number = 10
+): Promise<BookSearchResult[]> => {
+  const apiService = new LibraryAPIService({
+    baseURL: BASE_URL,
+    apiKey: AUTH_KEY
+  });
+  
+  return await apiService.searchBooks({
+    query,
+    pageNo,
+    pageSize
+  });
+};
+
+/**
  * 환경 설정 확인
  */
 export const checkApiConfiguration = (): boolean => {
@@ -854,12 +1145,19 @@ export const checkApiConfiguration = (): boolean => {
  */
 export const exampleApiUsage = async () => {
   try {
-    // 수원시 지역의 최근 6개월 인기도서 조회
-    const books = await fetchPopularBooks('수원시', '2024-07-01', '2024-12-31');
-    console.log('인기도서 목록:', books);
-    return books;
+    // 도서 검색 예시
+    console.log('=== 도서 검색 API 테스트 ===');
+    const searchResults = await searchBooksAPI('사피엔스', 1, 5);
+    console.log('검색 결과:', searchResults);
+    
+    // 인기 도서 조회 예시
+    console.log('=== 인기 도서 API 테스트 ===');
+    const popularBooks = await fetchPopularBooks('수원시', '2024-07-01', '2024-12-31');
+    console.log('인기도서 목록:', popularBooks);
+    
+    return { searchResults, popularBooks };
   } catch (error) {
     console.error('API 사용 예시 오류:', error);
-    return [];
+    return { searchResults: [], popularBooks: [] };
   }
 }; 

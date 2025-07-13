@@ -59,6 +59,12 @@ const BannerSubtitle = styled.p`
   @media (max-width: 768px) {
     font-size: 15px;
   }
+  
+  .mobile-hide {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
 `;
 
 const BannerButton = styled.a`
@@ -91,6 +97,19 @@ const BannerButton = styled.a`
     font-size: 15px;
     width: 100%;
     justify-content: center;
+  }
+  
+  .button-text {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+  
+  .mobile-button-text {
+    display: none;
+    @media (max-width: 768px) {
+      display: inline;
+    }
   }
 `;
 
@@ -132,8 +151,10 @@ const PromotionBanner: React.FC = () => {
         <BannerText>
           <BannerTitle>경기도 북포인트 서비스</BannerTitle>
           <BannerSubtitle>
-            도서 대출로 포인트를 적립하고 다양한 혜택을 받아보세요!<br/>
-            경기도 공공도서관 통합 서비스로 더욱 편리하게 이용하실 수 있습니다.
+            도서 대출로 포인트를 적립하고 다양한 혜택을 받아보세요!
+            <span className="mobile-hide">
+              <br/>경기도 공공도서관 통합 서비스로 더욱 편리하게 이용하실 수 있습니다.
+            </span>
           </BannerSubtitle>
         </BannerText>
         <BannerButton 
@@ -141,7 +162,8 @@ const PromotionBanner: React.FC = () => {
           target="_blank" 
           rel="noopener noreferrer"
         >
-          🌟 북포인트 바로가기
+          <span className="button-text">🌟 북포인트 바로가기</span>
+          <span className="mobile-button-text">경기도 북포인트 서비스 바로가기</span>
         </BannerButton>
       </BannerContent>
     </BannerContainer>

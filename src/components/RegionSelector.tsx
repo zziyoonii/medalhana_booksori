@@ -124,7 +124,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
   });
 
   // 인기 지역 버튼
-  const popularRegions = ['수원시', '성남시', '고양시', '부천시', '안양시', '용인시'];
+  const popularRegions = ['수원시', '성남시', '고양시', '용인시'];
 
   // 지역별 더미 도서관 데이터 생성
   const generateDummyLibraries = (region: string) => {
@@ -197,69 +197,17 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
     setIsError(false);
     setStatusMessage('');
     
-    try {
-      setStatusMessage('📍 경기데이터드림 API에서 도서관 정보를 검색하고 있습니다...');
-      
-      // 실제 경기데이터드림 API 호출
-      const apiLibraries = await libraryAPI.getLibraries();
-      
-      console.log('API에서 받은 도서관 데이터:', apiLibraries);
-      
-      // 주소 기반 필터링 - 더 유연한 매칭
-      const filteredLibraries = apiLibraries
-        .filter(lib => {
-          const addressKeywords = regionInput.split(' ').filter(keyword => keyword.length > 0);
-          const searchText = regionInput.toLowerCase();
-          const libraryText = (lib.address + ' ' + lib.name).toLowerCase();
-          
-          // 더 유연한 검색: 부분 문자열 매칭
-          return addressKeywords.some(keyword => 
-            libraryText.includes(keyword.toLowerCase())
-          ) || libraryText.includes(searchText);
-        })
-        .slice(0, 10); // 최대 10개 결과만 표시
-
-      console.log('필터링된 도서관:', filteredLibraries);
-      console.log('입력된 지역:', regionInput);
-      
-      if (filteredLibraries.length > 0) {
-        setStatusMessage(`✅ 실제 API에서 ${filteredLibraries.length}개의 도서관을 찾았습니다.`);
-        
-        // API 결과를 표준 포맷으로 변환
-        const formattedResults = filteredLibraries.map((lib, index) => ({
-          id: index + 1,
-          name: lib.name,
-          address: lib.address,
-          distance: lib.distance,
-          phone: lib.phone,
-          hours: lib.hours,
-          status: '운영중'
-        }));
-        
-        onLibrariesUpdate(formattedResults);
-        onRegionUpdate(regionInput);
-      } else {
-        setStatusMessage('⚠️ API에서 해당 지역의 도서관을 찾을 수 없어 샘플 데이터를 표시합니다.');
-        setIsError(false);
-        
-        // 더미 데이터로 대체
-        const dummyLibraries = generateDummyLibraries(regionInput);
-        onLibrariesUpdate(dummyLibraries);
-        onRegionUpdate(regionInput);
-      }
-      
-    } catch (error) {
-      console.error('도서관 검색 실패:', error);
-      setStatusMessage('❌ API 호출에 실패했습니다. 샘플 데이터를 표시합니다.');
-      setIsError(true);
-      
-      // 더미 데이터로 대체
-      const dummyLibraries = generateDummyLibraries(regionInput);
-      onLibrariesUpdate(dummyLibraries);
-      onRegionUpdate(regionInput);
-    } finally {
-      setLoading(false);
-    }
+    // 단순히 지역명만 전달하고 BookSearchSection에서 처리하도록 변경
+    console.log(`🗺️ RegionSelector: "${regionInput}" 지역 선택됨`);
+    setStatusMessage(`📍 "${regionInput}" 지역이 선택되었습니다. 도서명을 검색해보세요.`);
+    setIsError(false);
+    
+    // 지역명만 부모 컴포넌트로 전달
+    console.log('🗺️ RegionSelector: onRegionUpdate 호출:', regionInput);
+    onRegionUpdate(regionInput);
+    onLibrariesUpdate([]); // 빈 배열로 초기화
+    
+    setLoading(false);
   };
 
   const handleQuickRegionSelect = (region: string) => {
@@ -293,7 +241,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
       <RegionInputContainer>
         <RegionInput
           type="text"
-          placeholder="지역을 입력하세요 (예: 수원시, 성남시, 광교동)"
+          placeholder="지역을 입력하세요 (예: 기흥구, 수지구, 서천동, 광교동)"
           value={regionInput}
           onChange={(e) => setRegionInput(e.target.value)}
           onKeyPress={handleKeyPress}

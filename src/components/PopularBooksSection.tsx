@@ -247,15 +247,22 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
       const apiConfig = checkApiConfiguration();
       setApiEnabled(apiConfig);
       
-      const books = await fetchPopularBooks(selectedRegion);
-      setPopularBooks(books);
+      // 오늘 기준 최신 데이터 (2025년 최신 기간)
+      const today = new Date();
+      const endDate = '2025-07-13'; // 설정된 최신 날짜
+      const startDate = '2025-01-01'; // 2025년 시작
+      
+      console.log(`📅 오늘(${today.toLocaleDateString()}) 기준 최신 인기도서 조회: ${startDate} ~ ${endDate}`);
+      
+      const books = await fetchPopularBooks(startDate, endDate);
+      setPopularBooks(books.slice(0, 5)); // Top 5만 표시
     } catch (error) {
       console.error('인기 도서 로딩 실패:', error);
       setApiError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
-  }, [selectedRegion]);
+  }, []);
 
   useEffect(() => {
     loadPopularBooks();
@@ -264,7 +271,7 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
   return (
     <PopularBooksContainer>
       <Description>
-        📊 지금 가장 많이 빌려지는 도서 TOP 5 (아동 도서 제외)
+        📊 오늘 기준 가장 최신 대출 인기 순위 TOP 5 (성인 대상)
       </Description>
       
       <ApiStatus isError={!!apiError}>

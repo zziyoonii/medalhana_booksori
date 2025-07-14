@@ -362,6 +362,15 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     }
   }, []);
 
+  // 청구기호 생성 함수
+  const generateCallNumber = (title: string, author: string): string => {
+    // 간단한 청구기호 생성 (실제 도서관에서는 더 복잡한 분류 체계를 사용)
+    const titleCode = title.slice(0, 2).toUpperCase();
+    const authorCode = author.slice(0, 2).toUpperCase();
+    const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${titleCode}${authorCode}${randomNum}`;
+  };
+
   // 실제 도서관 정보 + API 소장 현황 결합
   
   // 실제 도서관 정보 + API 소장 현황 결합
@@ -592,7 +601,9 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
             if (!book.isbn || book.isbn.trim() === '') {
               // ISBN이 없으면 소장 정보 조회 불가 안내
               console.log(`📚 ${book.title}: ISBN 없음 - 소장 정보 조회 불가`);
-                              libraries = [{
+              return {
+                ...book,
+                libraries: [{
                   id: 'no_isbn',
                   name: '📋 실제 소장 정보 확인 필요',
                   address: '이 도서는 ISBN 정보가 없어 자동 조회가 어렵습니다',
@@ -601,7 +612,8 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
                   available: false,
                   reservable: false,
                   callNumber: `${book.title} 검색`
-                }];
+                }]
+              };
             } else {
               // 실제 소장 정보 조회
               const realAvailability = await getRealLibraryAvailability(book.isbn, searchRegion);

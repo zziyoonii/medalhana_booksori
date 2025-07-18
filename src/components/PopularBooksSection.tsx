@@ -27,7 +27,7 @@ const BookTable = styled.div`
 
 const TableHeader = styled.div`
   display: grid;
-  grid-template-columns: 60px 1fr 120px 100px 80px 100px;
+  grid-template-columns: 60px 1fr 120px 100px 80px;
   background: var(--primary-color);
   color: white;
   padding: 16px 20px;
@@ -69,7 +69,7 @@ const HeaderCell = styled.div`
 
 const BookRow = styled.div`
   display: grid;
-  grid-template-columns: 60px 1fr 120px 100px 80px 100px;
+  grid-template-columns: 60px 1fr 120px 100px 80px;
   padding: 16px 20px;
   align-items: center;
   gap: 12px;

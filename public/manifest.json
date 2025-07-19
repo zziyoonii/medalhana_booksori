@@ -1,0 +1,15 @@
+{
+  "short_name": "Booksori",
+  "name": "북소리",
+  "icons": [
+    {
+      "src": "/img/booksori_logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#4C8C4A",
+  "background_color": "#ffffff"
+}

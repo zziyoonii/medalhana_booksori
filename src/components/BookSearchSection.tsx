@@ -296,7 +296,7 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
   
   // LibraryAPIService 인스턴스 생성
   const libraryAPIService = new LibraryAPIService({
-    baseURL: 'http://data4library.kr/api',
+    baseURL: 'https://www.data4library.kr/api',
     apiKey: process.env.REACT_APP_LIBRARY_API_KEY || '8b62aa70e514468596e9324d064d582d'
   });
 

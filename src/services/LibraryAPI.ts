@@ -644,11 +644,11 @@ export class LibraryAPIService {
 
   /**
    * 도서 검색 - 도서관정보나루 API 활용
-   * 실제 API: http://data4library.kr/api/srchBooks
+   * 실제 API: https://www.data4library.kr/api/srchBooks
    */
   async searchBooks(params: BookSearchParams): Promise<BookSearchResult[]> {
     try {
-      const apiUrl = 'http://data4library.kr/api/srchBooks';
+      const apiUrl = 'https://www.data4library.kr/api/srchBooks';
       
       // 검색어 전처리 및 인코딩
       const cleanQuery = params.query.trim().replace(/\s+/g, ' ');
@@ -795,11 +795,11 @@ export class LibraryAPIService {
 
   /**
    * 도서 소장 현황 조회 - 도서관정보나루 API 활용
-   * 실제 API: http://data4library.kr/api/libSrchByBook
+   * 실제 API: https://www.data4library.kr/api/libSrchByBook
    */
   async getBookAvailability(isbn: string, region: string = '41'): Promise<LibraryAvailability[]> {
     try {
-      const apiUrl = 'http://data4library.kr/api/libSrchByBook';
+      const apiUrl = 'https://www.data4library.kr/api/libSrchByBook';
       
       // 지역코드 매핑 (경기도: 41, 서울: 11, 부산: 26, 대구: 27, 인천: 28, 광주: 29, 대전: 30, 울산: 31, 세종: 36, 강원: 42, 충북: 43, 충남: 44, 전북: 45, 전남: 46, 경북: 47, 경남: 48, 제주: 50)
       const regionCodes: Record<string, string> = {
@@ -1059,7 +1059,7 @@ REACT_APP_LIBRARY_API_KEY=your_library_api_key_here`
 };
 
 // 도서관 정보나루 API 서비스
-const BASE_URL = 'http://data4library.kr/api';
+const BASE_URL = 'https://www.data4library.kr/api';
 
 // API 인증키 (실제 인증키로 설정)
 // 도서관정보나루 API 키 설정됨
@@ -1182,7 +1182,7 @@ export const fetchPopularBooks = async (
       pageSize: '20'
     });
 
-    const url = `http://data4library.kr/api/loanItemSrch?${params}`;
+    const url = `https://www.data4library.kr/api/loanItemSrch?${params}`;
     
     console.log(`🔥 인기대출도서 API 호출 (${actualStartDate} ~ ${actualEndDate}):`, url);
     
@@ -1643,7 +1643,7 @@ export const getApiTroubleshootingGuide = (): string[] => {
     '   - 경기데이터드림 API: 연결 문제 (CORS 또는 API 키)',
     '',
     '📞 문의처:',
-    '   - 도서관정보나루: http://data4library.kr',
+    '   - 도서관정보나루: https://www.data4library.kr',
     '   - 경기데이터드림: https://data.gg.go.kr'
   ];
 };
@@ -1871,7 +1871,7 @@ export const testLibraryAPI = async (): Promise<void> => {
   console.log('🔑 사용 중인 API 키:', `${apiKey.substring(0, 10)}...`);
   
   // 1. 간단한 도서관 조회 API 테스트
-  const libTestUrl = `http://data4library.kr/api/libSrch?authKey=${apiKey}&pageNo=1&pageSize=5`;
+  const libTestUrl = `https://www.data4library.kr/api/libSrch?authKey=${apiKey}&pageNo=1&pageSize=5`;
   console.log('🏛️ 도서관 조회 API 테스트:', libTestUrl);
   
   try {
@@ -1892,7 +1892,7 @@ export const testLibraryAPI = async (): Promise<void> => {
   }
   
   // 2. 인기대출도서 API 테스트
-  const popularTestUrl = `http://data4library.kr/api/loanItemSrch?authKey=${apiKey}&startDt=2023-01-01&endDt=2023-12-31&pageNo=1&pageSize=5`;
+  const popularTestUrl = `https://www.data4library.kr/api/loanItemSrch?authKey=${apiKey}&startDt=2023-01-01&endDt=2023-12-31&pageNo=1&pageSize=5`;
   console.log('🏆 인기대출도서 API 테스트:', popularTestUrl);
   
   try {

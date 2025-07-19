@@ -5,6 +5,7 @@ import BookSearchSection from '../components/BookSearchSection';
 import ReadingGroupSection from '../components/ReadingGroupSection';
 import PromotionBanner from '../components/PromotionBanner';
 import PopularBooksSection from '../components/PopularBooksSection';
+import { PopularBookData } from '../services/LibraryAPI';
 
 // Library 인터페이스 제거 (사용하지 않음)
 
@@ -74,17 +75,22 @@ const SectionTitle = styled.h2`
 `;
 
 const MainPage: React.FC = () => {
-  const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [selectedRegion, setSelectedRegion] = useState<string>(''); // 빈 문자열로 초기화 (경기도 전체)
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedBookData, setSelectedBookData] = useState<PopularBookData | null>(null);
 
-  const handleBookClick = (title: string) => {
-    setSearchQuery(title);
+  const handleBookClick = (bookData: PopularBookData) => {
+    console.log('🎯 인기 도서 클릭됨:', bookData);
+    setSearchQuery(bookData.title);
+    setSelectedBookData(bookData);
+    console.log('📤 BookSearchSection에 전달할 데이터:', bookData);
     // 페이지 최상단으로 스크롤
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleExternalSearchComplete = () => {
     setSearchQuery('');
+    setSelectedBookData(null);
   };
 
   return (
@@ -99,6 +105,7 @@ const MainPage: React.FC = () => {
             onExternalSearchComplete={handleExternalSearchComplete}
             selectedRegion={selectedRegion}
             onRegionUpdate={setSelectedRegion}
+            externalBookData={selectedBookData}
           />
         </Section>
         

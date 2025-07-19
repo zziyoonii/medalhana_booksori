@@ -1,0 +1,26 @@
+{
+  "short_name": "북소리",
+  "name": "북소리 - 우리 동네 도서관 책을 한눈에",
+  "icons": [
+    {
+      "src": "img/booksori_favicon.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "img/booksori_logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "img/booksori_logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#4C8C4A",
+  "background_color": "#ffffff",
+  "description": "우리 동네 도서관 책을 한눈에, 함께 읽는 사람도 함께 찾아보세요"
+} 

@@ -229,7 +229,7 @@ const ClickGuide = styled.p`
 `;
 
 interface PopularBooksSectionProps {
-  onBookClick: (title: string) => void;
+  onBookClick: (bookData: PopularBookData) => void;
   selectedRegion?: string;
 }
 
@@ -247,12 +247,26 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
       const apiConfig = checkApiConfiguration();
       setApiEnabled(apiConfig);
       
-      // 오늘 기준 최신 데이터 (2025년 최신 기간)
+      // 이번주(월요일부터 일요일까지) 기준으로 계산
       const today = new Date();
-      const endDate = '2025-07-13'; // 설정된 최신 날짜
-      const startDate = '2025-01-01'; // 2025년 시작
       
-      console.log(`📅 오늘(${today.toLocaleDateString()}) 기준 최신 인기도서 조회: ${startDate} ~ ${endDate}`);
+      // 이번주 월요일 계산
+      const monday = new Date(today);
+      const dayOfWeek = today.getDay(); // 0=일요일, 1=월요일, ..., 6=토요일
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 월요일까지의 일수
+      monday.setDate(today.getDate() - daysToMonday);
+      
+      // 이번주 일요일 계산 (오늘이 일요일이면 오늘, 아니면 다음 일요일)
+      const sunday = new Date(today);
+      if (dayOfWeek !== 0) { // 오늘이 일요일이 아니면
+        const daysToSunday = 7 - dayOfWeek;
+        sunday.setDate(today.getDate() + daysToSunday);
+      }
+      
+      const startDate = monday.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+      const endDate = sunday.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+      
+      console.log(`📅 이번주(${monday.toLocaleDateString()} ~ ${sunday.toLocaleDateString()}) 기준 인기도서 조회: ${startDate} ~ ${endDate}`);
       
       const books = await fetchPopularBooks(startDate, endDate);
       setPopularBooks(books.slice(0, 5)); // Top 5만 표시
@@ -271,7 +285,7 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
   return (
     <PopularBooksContainer>
       <Description>
-        📊 오늘 기준 가장 최신 대출 인기 순위 TOP 5 (성인 대상)
+        📊 이번주 대출 인기 순위 TOP 5 (성인 대상)
       </Description>
       
       <ApiStatus isError={!!apiError}>
@@ -302,7 +316,7 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
           </TableHeader>
           
           {popularBooks.map((book, index) => (
-            <BookRow key={book.id} onClick={() => onBookClick(book.title)}>
+            <BookRow key={book.id} onClick={() => onBookClick(book)}>
               <RankCell>{index + 1}</RankCell>
               <BookInfoCell>
                 <BookTitle>{book.title}</BookTitle>

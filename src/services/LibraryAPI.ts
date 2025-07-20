@@ -649,7 +649,7 @@ export class LibraryAPIService {
    */
   async searchBooks(params: BookSearchParams): Promise<BookSearchResult[]> {
     try {
-      const apiUrl = 'http://data4library.kr/api/srchBooks';
+      const apiUrl = 'https://data4library.kr/api/srchBooks';
       
       // 검색어 전처리 및 인코딩
       const cleanQuery = params.query.trim().replace(/\s+/g, ' ');
@@ -1041,7 +1041,7 @@ export class LibraryAPIService {
       console.log('🔍 도서 소장 현황 조회 시작:', { isbn, region });
       
       // 1. 먼저 도서 검색으로 ISBN 확인
-      const searchUrl = 'http://data4library.kr/api/srchBooks';
+      const searchUrl = 'https://data4library.kr/api/srchBooks';
       const searchParams = new URLSearchParams({
         authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
         isbn: isbn,
@@ -1064,7 +1064,7 @@ export class LibraryAPIService {
       console.log('🔍 실제 소장 현황 API 호출 시도...');
       
       // 도서관정보나루 소장 현황 API (itemSrch만 시도)
-      const availabilityUrl = 'http://data4library.kr/api/itemSrch';
+              const availabilityUrl = 'https://data4library.kr/api/itemSrch';
       const availabilityParams = new URLSearchParams({
         authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
         isbn: isbn,
@@ -1077,7 +1077,7 @@ export class LibraryAPIService {
       console.log('🔍 배가기호/소장권수 정보 조회 시도...');
       
       // 먼저 도서관 목록을 가져와서 libSrchByBook API 사용
-      const libListUrl = 'http://data4library.kr/api/libSrch';
+              const libListUrl = 'https://data4library.kr/api/libSrch';
       const libListParams = new URLSearchParams({
         authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
         format: 'json',
@@ -1103,7 +1103,7 @@ export class LibraryAPIService {
             console.log('📚 선택된 도서관:', firstLib.libName, '코드:', libCode);
             
             // libSrchByBook API 호출
-            const detailUrl = 'http://data4library.kr/api/libSrchByBook';
+            const detailUrl = 'https://data4library.kr/api/libSrchByBook';
             const detailParams = new URLSearchParams({
               authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
               libCode: libCode,
@@ -1179,7 +1179,7 @@ export class LibraryAPIService {
       }
       
       // 4. 도서관 목록 조회 (실제 API 엔드포인트 사용)
-      const regionLibUrl = 'http://data4library.kr/api/libSrch';
+              const regionLibUrl = 'https://data4library.kr/api/libSrch';
       const regionLibParams = new URLSearchParams({
         authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
         format: 'json',
@@ -1567,7 +1567,7 @@ REACT_APP_LIBRARY_API_KEY=your_library_api_key_here`
 };
 
 // 도서관 정보나루 API 서비스
-const BASE_URL = 'http://data4library.kr/api';
+const BASE_URL = 'https://data4library.kr/api';
 
 // API 인증키 (실제 인증키로 설정)
 // 도서관정보나루 API 키 설정됨
@@ -1762,7 +1762,7 @@ export const fetchPopularBooks = async (
       pageSize: '20'
     });
 
-    const url = `http://data4library.kr/api/loanItemSrch?${params}`;
+          const url = `https://data4library.kr/api/loanItemSrch?${params}`;
     
     console.log(`🔥 인기대출도서 API 호출:`);
     console.log(`   📅 날짜 범위: ${actualStartDate} ~ ${actualEndDate}`);
@@ -2600,7 +2600,7 @@ export const testLibraryAPI = async (): Promise<void> => {
   console.log('🔑 사용 중인 API 키:', `${apiKey.substring(0, 10)}...`);
   
   // 1. 간단한 도서관 조회 API 테스트
-  const libTestUrl = `http://data4library.kr/api/libSrch?authKey=${apiKey}&pageNo=1&pageSize=5`;
+      const libTestUrl = `https://data4library.kr/api/libSrch?authKey=${apiKey}&pageNo=1&pageSize=5`;
   console.log('🏛️ 도서관 조회 API 테스트:', libTestUrl);
   
   try {
@@ -2627,7 +2627,7 @@ export const testLibraryAPI = async (): Promise<void> => {
     const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
     const currentDay = String(today.getDate()).padStart(2, '0');
     
-    const popularTestUrl = `http://data4library.kr/api/loanItemSrch?authKey=${apiKey}&startDt=${currentYear}-01-01&endDt=${currentYear}-${currentMonth}-${currentDay}&pageNo=1&pageSize=5`;
+    const popularTestUrl = `https://data4library.kr/api/loanItemSrch?authKey=${apiKey}&startDt=${currentYear}-01-01&endDt=${currentYear}-${currentMonth}-${currentDay}&pageNo=1&pageSize=5`;
   console.log('🏆 인기대출도서 API 테스트:', popularTestUrl);
   
   try {

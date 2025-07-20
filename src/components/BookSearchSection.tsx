@@ -321,7 +321,7 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
   
   // LibraryAPIService 인스턴스 생성
   const libraryAPIService = new LibraryAPIService({
-    baseURL: 'http://data4library.kr/api',
+          baseURL: 'https://data4library.kr/api',
     apiKey: process.env.REACT_APP_LIBRARY_API_KEY || '8b62aa70e514468596e9324d064d582d'
   });
 
@@ -471,7 +471,7 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
       }
       
       // 직접 API 호출 테스트
-      const testUrl = `http://data4library.kr/api/srchBooks?authKey=${apiKey}&format=json&pageNo=1&pageSize=5&keyword=해리포터`;
+      const testUrl = `https://data4library.kr/api/srchBooks?authKey=${apiKey}&format=json&pageNo=1&pageSize=5&keyword=해리포터`;
       console.log('🌐 API 호출 URL:', testUrl);
       
       const response = await fetch(testUrl);

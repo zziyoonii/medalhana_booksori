@@ -1085,10 +1085,21 @@ export class LibraryAPIService {
           // 실제 소장 현황 데이터가 있는지 확인
           if (availabilityData.response && availabilityData.response.docs && availabilityData.response.docs.length > 0) {
             console.log('✅ 실제 소장 현황 데이터 발견!');
+            console.log('📊 첫 번째 도서 데이터 상세:', JSON.stringify(availabilityData.response.docs[0], null, 2));
             
             const realAvailability: LibraryAvailability[] = availabilityData.response.docs.map((doc: any) => {
               // 배가기호 정보 파싱 (여러 필드명 시도)
               let shelfLocation = '위치 정보 없음';
+              console.log('🔍 배가기호 필드 확인:', {
+                shelf_loc_code: doc.shelf_loc_code,
+                shelfLocation: doc.shelfLocation,
+                shelf_code: doc.shelf_code,
+                callNumber: doc.callNumber,
+                call_number: doc.call_number,
+                location: doc.location,
+                shelf: doc.shelf
+              });
+              
               if (doc.shelf_loc_code && doc.shelf_loc_code.trim() !== '') {
                 shelfLocation = doc.shelf_loc_code;
               } else if (doc.shelfLocation && doc.shelfLocation.trim() !== '') {
@@ -1097,10 +1108,25 @@ export class LibraryAPIService {
                 shelfLocation = doc.shelf_code;
               } else if (doc.callNumber && doc.callNumber.trim() !== '') {
                 shelfLocation = doc.callNumber;
+              } else if (doc.call_number && doc.call_number.trim() !== '') {
+                shelfLocation = doc.call_number;
+              } else if (doc.location && doc.location.trim() !== '') {
+                shelfLocation = doc.location;
+              } else if (doc.shelf && doc.shelf.trim() !== '') {
+                shelfLocation = doc.shelf;
               }
               
               // 소장권수 정보 파싱 (여러 필드명 시도)
               let volumeCount = 0;
+              console.log('🔍 소장권수 필드 확인:', {
+                vol: doc.vol,
+                volumeCount: doc.volumeCount,
+                volume: doc.volume,
+                count: doc.count,
+                quantity: doc.quantity,
+                copies: doc.copies
+              });
+              
               if (doc.vol && doc.vol.trim() !== '') {
                 volumeCount = parseInt(doc.vol) || 0;
               } else if (doc.volumeCount && doc.volumeCount.trim() !== '') {
@@ -1109,11 +1135,21 @@ export class LibraryAPIService {
                 volumeCount = parseInt(doc.volume) || 0;
               } else if (doc.count && doc.count.trim() !== '') {
                 volumeCount = parseInt(doc.count) || 0;
+              } else if (doc.quantity && doc.quantity.trim() !== '') {
+                volumeCount = parseInt(doc.quantity) || 0;
+              } else if (doc.copies && doc.copies.trim() !== '') {
+                volumeCount = parseInt(doc.copies) || 0;
               }
               
               // 대출 상태 확인
               const isAvailable = doc.loanStatus !== '대출중' && doc.loanStatus !== '예약중';
               const isLoanable = doc.loanStatus === '대출가능' || doc.loanStatus === '대출가능';
+              
+              console.log('🔍 대출 상태 확인:', {
+                loanStatus: doc.loanStatus,
+                isAvailable,
+                isLoanable
+              });
               
               return {
                 libraryId: doc.libCode || doc.libraryCode || doc.lib_code || 'unknown',

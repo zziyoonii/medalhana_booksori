@@ -1184,6 +1184,80 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     });
   };
 
+  // 오늘 날짜 기준 도서관 운영 상태 확인
+  const getLibraryOperatingStatus = (hours: string) => {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTime = currentHour * 60 + currentMinute; // 분 단위로 변환
+    
+    // 운영 시간 파싱 (예: "09:00-18:00")
+    const timeMatch = hours.match(/(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
+    if (!timeMatch) {
+      return { isOpen: false, status: '운영시간 정보 없음', reason: '운영시간 형식 오류' };
+    }
+    
+    const openHour = parseInt(timeMatch[1]);
+    const openMinute = parseInt(timeMatch[2]);
+    const closeHour = parseInt(timeMatch[3]);
+    const closeMinute = parseInt(timeMatch[4]);
+    
+    const openTime = openHour * 60 + openMinute;
+    const closeTime = closeHour * 60 + closeMinute;
+    
+    // 일요일 휴무 (대부분의 공공도서관)
+    if (dayOfWeek === 0) {
+      return { isOpen: false, status: '휴무일', reason: '일요일 휴무' };
+    }
+    
+    // 현재 시간이 운영 시간 내인지 확인
+    const isWithinHours = currentTime >= openTime && currentTime <= closeTime;
+    
+    if (isWithinHours) {
+      const remainingMinutes = closeTime - currentTime;
+      const remainingHours = Math.floor(remainingMinutes / 60);
+      const remainingMins = remainingMinutes % 60;
+      
+      let remainingText = '';
+      if (remainingHours > 0) {
+        remainingText = `${remainingHours}시간 ${remainingMins}분 후 마감`;
+      } else {
+        remainingText = `${remainingMins}분 후 마감`;
+      }
+      
+      return { 
+        isOpen: true, 
+        status: '운영중', 
+        reason: remainingText,
+        remainingTime: remainingMinutes
+      };
+    } else if (currentTime < openTime) {
+      const untilOpenMinutes = openTime - currentTime;
+      const untilOpenHours = Math.floor(untilOpenMinutes / 60);
+      const untilOpenMins = untilOpenMinutes % 60;
+      
+      let untilOpenText = '';
+      if (untilOpenHours > 0) {
+        untilOpenText = `${untilOpenHours}시간 ${untilOpenMins}분 후 개관`;
+      } else {
+        untilOpenText = `${untilOpenMins}분 후 개관`;
+      }
+      
+      return { 
+        isOpen: false, 
+        status: '개관 전', 
+        reason: untilOpenText 
+      };
+    } else {
+      return { 
+        isOpen: false, 
+        status: '마감', 
+        reason: '오늘은 마감' 
+      };
+    }
+  };
+
   return (
     <Container>
       <SearchForm onSubmit={handleSearch}>
@@ -1293,7 +1367,38 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
                     <LibraryDetails>
                       <div>📍 {library.address}</div>
                       <div>📞 {library.phone}</div>
-                      <div>🕐 {library.hours}</div>
+                      
+                      {/* 운영 시간 및 현재 상태 */}
+                      {(() => {
+                        const operatingStatus = getLibraryOperatingStatus(library.hours);
+                        return (
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px',
+                            marginBottom: '8px'
+                          }}>
+                            <span>🕐 {library.hours}</span>
+                            <span style={{
+                              padding: '2px 6px',
+                              borderRadius: '12px',
+                              fontSize: '11px',
+                              fontWeight: 'bold',
+                              backgroundColor: operatingStatus.isOpen ? '#e8f5e8' : '#ffe8e8',
+                              color: operatingStatus.isOpen ? '#2e7d32' : '#c62828',
+                              border: `1px solid ${operatingStatus.isOpen ? '#4caf50' : '#f44336'}`
+                            }}>
+                              {operatingStatus.status}
+                            </span>
+                            <span style={{
+                              fontSize: '11px',
+                              color: '#666'
+                            }}>
+                              {operatingStatus.reason}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       
                       {/* 소장 여부 - 실제 API 데이터 또는 기본값 */}
                       <div style={{ 

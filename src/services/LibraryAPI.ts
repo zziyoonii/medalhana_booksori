@@ -1122,7 +1122,7 @@ export class LibraryAPIService {
             return null;
           }
           
-          // 각 도서관별 소장 현황 API 호출
+          // 각 도서관별 소장 현황 API 호출 - 올바른 파라미터 사용
           const availabilityUrl = 'https://data4library.kr/api/itemSrch';
           const availabilityParams = new URLSearchParams({
             authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
@@ -1143,97 +1143,169 @@ export class LibraryAPIService {
               const availabilityData = await availabilityResponse.json();
               console.log(`📊 ${lib.libName} API 응답:`, JSON.stringify(availabilityData, null, 2));
               
-              // 실제 소장 현황 데이터가 있는지 확인
-              if (availabilityData.response && availabilityData.response.docs && availabilityData.response.docs.length > 0) {
-                console.log(`✅ ${lib.libName}에서 실제 소장 현황 발견!`);
+              // API 에러 체크
+              if (availabilityData.response && availabilityData.response.error) {
+                console.log(`⚠️ ${lib.libName} API 에러:`, availabilityData.response.error);
                 
-                const doc = availabilityData.response.docs[0]; // 첫 번째 결과 사용
+                // API 에러 시 다른 방법으로 시도
+                console.log(`🔄 ${lib.libName} 다른 API 엔드포인트 시도...`);
                 
-                // 배가기호 정보 파싱 (여러 필드명 시도)
-                let shelfLocation = '위치 정보 없음';
-                console.log(`🔍 ${lib.libName} 배가기호 필드 확인:`, {
-                  shelf_loc_code: doc.shelf_loc_code,
-                  shelfLocation: doc.shelfLocation,
-                  shelf_code: doc.shelf_code,
-                  callNumber: doc.callNumber,
-                  call_number: doc.call_number,
-                  location: doc.location,
-                  shelf: doc.shelf
+                // 대안: libSrchByBook API 시도
+                const alternativeUrl = 'https://data4library.kr/api/libSrchByBook';
+                const alternativeParams = new URLSearchParams({
+                  authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
+                  isbn: isbn,
+                  libCode: libCode,
+                  format: 'json',
+                  pageNo: '1',
+                  pageSize: '10'
                 });
                 
-                if (doc.shelf_loc_code && doc.shelf_loc_code.trim() !== '') {
-                  shelfLocation = doc.shelf_loc_code;
-                } else if (doc.shelfLocation && doc.shelfLocation.trim() !== '') {
-                  shelfLocation = doc.shelfLocation;
-                } else if (doc.shelf_code && doc.shelf_code.trim() !== '') {
-                  shelfLocation = doc.shelf_code;
-                } else if (doc.callNumber && doc.callNumber.trim() !== '') {
-                  shelfLocation = doc.callNumber;
-                } else if (doc.call_number && doc.call_number.trim() !== '') {
-                  shelfLocation = doc.call_number;
-                } else if (doc.location && doc.location.trim() !== '') {
-                  shelfLocation = doc.location;
-                } else if (doc.shelf && doc.shelf.trim() !== '') {
-                  shelfLocation = doc.shelf;
+                console.log(`📚 ${lib.libName} 대안 API 호출:`, `${alternativeUrl}?${alternativeParams}`);
+                
+                try {
+                  const alternativeResponse = await fetch(`${alternativeUrl}?${alternativeParams}`);
+                  if (alternativeResponse.ok) {
+                    const alternativeData = await alternativeResponse.json();
+                    console.log(`📊 ${lib.libName} 대안 API 응답:`, JSON.stringify(alternativeData, null, 2));
+                    
+                    if (alternativeData.response && alternativeData.response.docs && alternativeData.response.docs.length > 0) {
+                      console.log(`✅ ${lib.libName}에서 대안 API로 소장 현황 발견!`);
+                      
+                      const doc = alternativeData.response.docs[0];
+                      
+                      // 배가기호 정보 파싱
+                      let shelfLocation = '위치 정보 없음';
+                      if (doc.shelf_loc_code && doc.shelf_loc_code.trim() !== '') {
+                        shelfLocation = doc.shelf_loc_code;
+                      } else if (doc.callNumber && doc.callNumber.trim() !== '') {
+                        shelfLocation = doc.callNumber;
+                      }
+                      
+                      // 소장권수 정보 파싱
+                      let volumeCount = 0;
+                      if (doc.vol && doc.vol.trim() !== '') {
+                        volumeCount = parseInt(doc.vol) || 0;
+                      }
+                      
+                      return {
+                        libraryId: libCode,
+                        libraryName: lib.libName || '알 수 없는 도서관',
+                        available: true, // API에서 데이터가 있으면 소장함
+                        loanable: doc.loanStatus === '대출가능',
+                        dueDate: doc.dueDate || undefined,
+                        shelfLocation: shelfLocation,
+                        volumeCount: volumeCount
+                      };
+                    }
+                  }
+                } catch (alternativeError) {
+                  console.log(`⚠️ ${lib.libName} 대안 API 호출 중 오류:`, alternativeError);
                 }
                 
-                // 소장권수 정보 파싱 (여러 필드명 시도)
-                let volumeCount = 0;
-                console.log(`🔍 ${lib.libName} 소장권수 필드 확인:`, {
-                  vol: doc.vol,
-                  volumeCount: doc.volumeCount,
-                  volume: doc.volume,
-                  count: doc.count,
-                  quantity: doc.quantity,
-                  copies: doc.copies
-                });
-                
-                if (doc.vol && doc.vol.trim() !== '') {
-                  volumeCount = parseInt(doc.vol) || 0;
-                } else if (doc.volumeCount && doc.volumeCount.trim() !== '') {
-                  volumeCount = parseInt(doc.volumeCount) || 0;
-                } else if (doc.volume && doc.volume.trim() !== '') {
-                  volumeCount = parseInt(doc.volume) || 0;
-                } else if (doc.count && doc.count.trim() !== '') {
-                  volumeCount = parseInt(doc.count) || 0;
-                } else if (doc.quantity && doc.quantity.trim() !== '') {
-                  volumeCount = parseInt(doc.quantity) || 0;
-                } else if (doc.copies && doc.copies.trim() !== '') {
-                  volumeCount = parseInt(doc.copies) || 0;
-                }
-                
-                // 대출 상태 확인
-                const isAvailable = doc.loanStatus !== '대출중' && doc.loanStatus !== '예약중';
-                const isLoanable = doc.loanStatus === '대출가능' || doc.loanStatus === '대출가능';
-                
-                console.log(`🔍 ${lib.libName} 대출 상태 확인:`, {
-                  loanStatus: doc.loanStatus,
-                  isAvailable,
-                  isLoanable
-                });
-                
-                return {
-                  libraryId: libCode,
-                  libraryName: lib.libName || '알 수 없는 도서관',
-                  available: doc.loanStatus !== '대출중', // 대출중이 아니면 소장함
-                  loanable: isLoanable,
-                  dueDate: doc.dueDate || doc.returnDate || undefined,
-                  shelfLocation: shelfLocation,
-                  volumeCount: volumeCount
-                };
-              } else {
-                console.log(`⚠️ ${lib.libName}에서 소장 현황 데이터 없음`);
-                // 소장하지 않는 경우
-                return {
-                  libraryId: libCode,
-                  libraryName: lib.libName || '알 수 없는 도서관',
-                  available: false,
-                  loanable: false,
-                  dueDate: undefined,
-                  shelfLocation: '소장하지 않음',
-                  volumeCount: 0
-                };
-              }
+                                 // 모든 API 시도 실패 시 소장하지 않는 것으로 처리
+                 return {
+                   libraryId: libCode,
+                   libraryName: lib.libName || '알 수 없는 도서관',
+                   available: false,
+                   loanable: false,
+                   dueDate: undefined,
+                   shelfLocation: 'API 오류',
+                   volumeCount: 0
+                 };
+               }
+               
+               // 실제 소장 현황 데이터가 있는지 확인
+               if (availabilityData.response && availabilityData.response.docs && availabilityData.response.docs.length > 0) {
+                 console.log(`✅ ${lib.libName}에서 실제 소장 현황 발견!`);
+                 
+                 const doc = availabilityData.response.docs[0]; // 첫 번째 결과 사용
+                 
+                 // 배가기호 정보 파싱 (여러 필드명 시도)
+                 let shelfLocation = '위치 정보 없음';
+                 console.log(`🔍 ${lib.libName} 배가기호 필드 확인:`, {
+                   shelf_loc_code: doc.shelf_loc_code,
+                   shelfLocation: doc.shelfLocation,
+                   shelf_code: doc.shelf_code,
+                   callNumber: doc.callNumber,
+                   call_number: doc.call_number,
+                   location: doc.location,
+                   shelf: doc.shelf
+                 });
+                 
+                 if (doc.shelf_loc_code && doc.shelf_loc_code.trim() !== '') {
+                   shelfLocation = doc.shelf_loc_code;
+                 } else if (doc.shelfLocation && doc.shelfLocation.trim() !== '') {
+                   shelfLocation = doc.shelfLocation;
+                 } else if (doc.shelf_code && doc.shelf_code.trim() !== '') {
+                   shelfLocation = doc.shelf_code;
+                 } else if (doc.callNumber && doc.callNumber.trim() !== '') {
+                   shelfLocation = doc.callNumber;
+                 } else if (doc.call_number && doc.call_number.trim() !== '') {
+                   shelfLocation = doc.call_number;
+                 } else if (doc.location && doc.location.trim() !== '') {
+                   shelfLocation = doc.location;
+                 } else if (doc.shelf && doc.shelf.trim() !== '') {
+                   shelfLocation = doc.shelf;
+                 }
+                 
+                 // 소장권수 정보 파싱 (여러 필드명 시도)
+                 let volumeCount = 0;
+                 console.log(`🔍 ${lib.libName} 소장권수 필드 확인:`, {
+                   vol: doc.vol,
+                   volumeCount: doc.volumeCount,
+                   volume: doc.volume,
+                   count: doc.count,
+                   quantity: doc.quantity,
+                   copies: doc.copies
+                 });
+                 
+                 if (doc.vol && doc.vol.trim() !== '') {
+                   volumeCount = parseInt(doc.vol) || 0;
+                 } else if (doc.volumeCount && doc.volumeCount.trim() !== '') {
+                   volumeCount = parseInt(doc.volumeCount) || 0;
+                 } else if (doc.volume && doc.volume.trim() !== '') {
+                   volumeCount = parseInt(doc.volume) || 0;
+                 } else if (doc.count && doc.count.trim() !== '') {
+                   volumeCount = parseInt(doc.count) || 0;
+                 } else if (doc.quantity && doc.quantity.trim() !== '') {
+                   volumeCount = parseInt(doc.quantity) || 0;
+                 } else if (doc.copies && doc.copies.trim() !== '') {
+                   volumeCount = parseInt(doc.copies) || 0;
+                 }
+                 
+                 // 대출 상태 확인
+                 const isAvailable = doc.loanStatus !== '대출중' && doc.loanStatus !== '예약중';
+                 const isLoanable = doc.loanStatus === '대출가능' || doc.loanStatus === '대출가능';
+                 
+                 console.log(`🔍 ${lib.libName} 대출 상태 확인:`, {
+                   loanStatus: doc.loanStatus,
+                   isAvailable,
+                   isLoanable
+                 });
+                 
+                 return {
+                   libraryId: libCode,
+                   libraryName: lib.libName || '알 수 없는 도서관',
+                   available: doc.loanStatus !== '대출중', // 대출중이 아니면 소장함
+                   loanable: isLoanable,
+                   dueDate: doc.dueDate || doc.returnDate || undefined,
+                   shelfLocation: shelfLocation,
+                   volumeCount: volumeCount
+                 };
+               } else {
+                 console.log(`⚠️ ${lib.libName}에서 소장 현황 데이터 없음`);
+                 // 소장하지 않는 경우
+                 return {
+                   libraryId: libCode,
+                   libraryName: lib.libName || '알 수 없는 도서관',
+                   available: false,
+                   loanable: false,
+                   dueDate: undefined,
+                   shelfLocation: '소장하지 않음',
+                   volumeCount: 0
+                 };
+               }
             } else {
               console.log(`⚠️ ${lib.libName} API 호출 실패:`, availabilityResponse.status);
               // API 호출 실패 시 소장하지 않는 것으로 처리

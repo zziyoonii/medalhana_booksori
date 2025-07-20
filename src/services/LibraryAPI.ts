@@ -1061,8 +1061,8 @@ export class LibraryAPIService {
         regionLibParams.append('region', regionCode);
         console.log(`🗺️ 지역 필터링: ${region} → ${regionCode}`);
       } else {
-        console.log(`⚠️ 알 수 없는 지역: ${region}, 경기도 전체로 검색`);
-        regionLibParams.append('region', '41');
+        console.log(`⚠️ 알 수 없는 지역: ${region}, 지역코드 없이 검색`);
+        // 지역코드가 없어도 API 호출 시도
       }
       
       console.log('🏛️ 도서관 목록 API 호출:', `${regionLibUrl}?${regionLibParams}`);
@@ -1074,6 +1074,34 @@ export class LibraryAPIService {
       
       const libData = await libResponse.json();
       console.log('📊 도서관 목록 결과:', JSON.stringify(libData, null, 2));
+      
+      // API 에러 체크
+      if (libData.response && libData.response.error) {
+        console.log('⚠️ 도서관 목록 API 에러:', libData.response.error);
+        
+        // 에러 발생 시 지역코드 없이 재시도
+        console.log('🔄 지역코드 없이 도서관 목록 API 재시도...');
+        
+        const retryParams = new URLSearchParams({
+          authKey: process.env.REACT_APP_LIBRARY_API_KEY || AUTH_KEY,
+          format: 'json',
+          pageNo: '1',
+          pageSize: '100'
+        });
+        
+        console.log('🏛️ 재시도 API 호출:', `${regionLibUrl}?${retryParams}`);
+        
+        const retryResponse = await fetch(`${regionLibUrl}?${retryParams}`);
+        if (retryResponse.ok) {
+          const retryData = await retryResponse.json();
+          console.log('📊 재시도 도서관 목록 결과:', JSON.stringify(retryData, null, 2));
+          
+          if (retryData.response && retryData.response.libs && retryData.response.libs.length > 0) {
+            console.log('✅ 재시도로 도서관 목록 가져오기 성공');
+            libData.response = retryData.response;
+          }
+        }
+      }
       
       // 3. 도서관 목록에서 실제 도서관 정보 추출
       if (libData.response && libData.response.libs && libData.response.libs.length > 0) {

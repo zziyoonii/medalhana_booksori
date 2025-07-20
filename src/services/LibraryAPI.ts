@@ -992,44 +992,16 @@ export class LibraryAPIService {
         return books;
       }
       
-      // API 응답이 예상과 다른 경우 검색어 기반 더미 데이터 생성
-      console.warn('⚠️ API 응답 구조가 예상과 다름, 검색어 기반 더미 데이터 생성');
-      return this.getDummyBooksForQuery(params.query);
+      // API 응답이 예상과 다른 경우 빈 배열 반환
+      console.warn('⚠️ API 응답 구조가 예상과 다름, 빈 배열 반환');
+      return [];
       
     } catch (error) {
       console.error('💥 도서 검색 실패:', error);
-      console.log('🔄 검색어 기반 더미 데이터로 대체합니다.');
-      return this.getDummyBooksForQuery(params.query);
+      console.log('🔄 API 실패로 빈 배열 반환');
+      return [];
     }
   }
-
-  /**
-   * 검색어 기반 더미 데이터 생성
-   */
-  private getDummyBooksForQuery(query: string): BookSearchResult[] {
-    const searchTerm = query.trim();
-    
-    // 검색어에 따른 맞춤 더미 데이터
-    const dummyBooks: BookSearchResult[] = [
-      {
-        id: `dummy_${Date.now()}`,
-        title: searchTerm,
-        author: '작가 미상',
-        publisher: '출판사 정보 없음',
-        isbn: '9788000000000',
-        category: '일반',
-        publishYear: '2023',
-        description: `"${searchTerm}"에 대한 검색 결과입니다. 정확한 도서 정보는 직접 도서관에 문의해 주세요.`,
-        imageUrl: '',
-        loanCount: 0
-      }
-    ];
-    
-    console.log(`🎯 검색어 "${searchTerm}" 기반 더미 데이터 생성:`, dummyBooks);
-    return dummyBooks;
-  }
-
-
 
   /**
    * 도서 소장 현황 조회 - 도서관정보나루 API 활용
@@ -1397,71 +1369,7 @@ export class LibraryAPIService {
     }
   }
 
-  /**
-   * 더미 소장 현황 데이터 반환
-   */
-  private getDummyAvailability(): LibraryAvailability[] {
-    console.log('📋 더미 소장 현황 데이터 생성');
-    
-    const fallbackLibraries = [
-      { libCode: 'lib_1', libName: '경기도립중앙도서관' },
-      { libCode: 'lib_2', libName: '수원시립중앙도서관' },
-      { libCode: 'lib_3', libName: '성남시립중앙도서관' },
-      { libCode: 'lib_4', libName: '고양시립중앙도서관' },
-      { libCode: 'lib_5', libName: '부천시립중앙도서관' }
-    ];
-    
-    const availability: LibraryAvailability[] = fallbackLibraries.map((lib: any, index: number) => {
-      // 더 현실적인 소장률: 60% 확률로 소장
-      const isInCollection = Math.random() > 0.4;
-      
-      // 배가기호 생성 (실제와 유사한 형태)
-      const shelfLocation = `${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(Math.random() * 999) + 1}-${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${Math.floor(Math.random() * 99) + 1}`;
-      
-      // 소장권수 (1-5권 사이)
-      const volumeCount = Math.floor(Math.random() * 5) + 1;
-      
-      if (!isInCollection) {
-        return {
-          libraryId: lib.libCode,
-          libraryName: lib.libName,
-          available: false,
-          loanable: false,
-          dueDate: undefined,
-          shelfLocation: '소장하지 않음',
-          volumeCount: 0
-        };
-      }
-      
-      const isCurrentlyLoaned = Math.random() > 0.4;
-      
-      if (isCurrentlyLoaned) {
-        const dueDate = new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        return {
-          libraryId: lib.libCode,
-          libraryName: lib.libName,
-          available: true,
-          loanable: false,
-          dueDate: dueDate,
-          shelfLocation: shelfLocation,
-          volumeCount: volumeCount
-        };
-      } else {
-        return {
-          libraryId: lib.libCode,
-          libraryName: lib.libName,
-          available: true,
-          loanable: true,
-          dueDate: undefined,
-          shelfLocation: shelfLocation,
-          volumeCount: volumeCount
-        };
-      }
-    });
-    
-    console.log('✅ 더미 소장 현황 데이터 생성 완료:', availability);
-    return availability;
-  }
+
 }
 
 // 기본 API 설정 (환경변수에서 로드)

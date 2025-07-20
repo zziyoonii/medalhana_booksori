@@ -315,9 +315,10 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<BookWithLibraries[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState(parentSelectedRegion || '');
   const [apiError, setApiError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<string>('경기도');
+  const [expandedBooks, setExpandedBooks] = useState<Set<string>>(new Set()); // 더보기 상태 관리
   
   // LibraryAPIService 인스턴스 생성
   const libraryAPIService = new LibraryAPIService({
@@ -1170,6 +1171,19 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     }
   };
 
+  // 더보기 토글 함수
+  const toggleExpanded = (bookId: string) => {
+    setExpandedBooks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(bookId)) {
+        newSet.delete(bookId);
+      } else {
+        newSet.add(bookId);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <Container>
       <SearchForm onSubmit={handleSearch}>
@@ -1261,10 +1275,13 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
                   color: '#2c3e50',
                   fontSize: '15px'
                 }}>
-                  📍 {selectedRegion && selectedRegion.trim() !== '' ? selectedRegion : '경기도'} 도서관 소장 현황
+                  📍 {selectedRegion && selectedRegion.trim() !== '' ? selectedRegion : '경기도'} 도서관 소장 현황 ({book.libraries.length}개 도서관)
                 </div>
                 
-                {book.libraries.map((library) => (
+                {/* 최대 3개 도서관만 표시, 더보기 상태에 따라 전체 표시 */}
+                {book.libraries
+                  .slice(0, expandedBooks.has(book.id || index.toString()) ? book.libraries.length : 3)
+                  .map((library) => (
                   <LibraryItem key={library.id}>
                     <LibraryName>
                       <AvailabilityBadge available={library.available}>
@@ -1296,8 +1313,6 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
                           </div>
                         )}
                       </div>
-                      
-
                       
                       {/* 배가기호와 소장권수 정보 표시 */}
                       <LocationInfo>
@@ -1337,6 +1352,37 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
                     </LibraryDetails>
                   </LibraryItem>
                 ))}
+                
+                {/* 더보기/접기 버튼 */}
+                {book.libraries.length > 3 && (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    marginTop: '15px',
+                    padding: '10px'
+                  }}>
+                    <button
+                      onClick={() => toggleExpanded(book.id || index.toString())}
+                      style={{
+                        backgroundColor: '#4CAF50',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        transition: 'background-color 0.3s'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
+                    >
+                      {expandedBooks.has(book.id || index.toString()) 
+                        ? `📖 접기 (${book.libraries.length}개 도서관)` 
+                        : `📖 더보기 (${book.libraries.length - 3}개 더)`
+                      }
+                    </button>
+                  </div>
+                )}
               </LibraryList>
             </BookCard>
           ))}

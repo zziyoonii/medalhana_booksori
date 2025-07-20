@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
+import { toast } from 'sonner';
 import RegionSelector from './RegionSelector';
 import { searchBooksAPI, fetchPopularBooks, PopularBookData, LibraryAPIService, LibraryAPIConfig } from '../services/LibraryAPI';
 
@@ -1015,6 +1016,17 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     } finally {
       setIsLoading(false);
       console.log('🔍 ===== 도서 검색 완료 =====');
+      
+      // 검색 결과에 따른 toast 알림
+      if (searchResults.length > 0) {
+        toast.success(`${searchResults.length}개의 도서를 찾았습니다!`, {
+          description: `"${searchTerm}" 검색 결과`
+        });
+      } else {
+        toast.error('검색 결과가 없습니다.', {
+          description: '다른 키워드로 검색해보세요.'
+        });
+      }
     }
   }, [selectedRegion, generateLibrariesForRegion]);
 

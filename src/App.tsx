@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Toaster } from 'sonner';
 import MainPage from './pages/MainPage';
 
 const AppContainer = styled.div`
@@ -13,6 +14,12 @@ function App() {
   return (
     <AppContainer>
       <MainPage />
+      <Toaster 
+        position="top-center"
+        richColors
+        closeButton
+        duration={4000}
+      />
     </AppContainer>
   );
 }

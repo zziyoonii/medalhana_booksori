@@ -1206,9 +1206,60 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     const openTime = openHour * 60 + openMinute;
     const closeTime = closeHour * 60 + closeMinute;
     
-    // 일요일 휴무 (대부분의 공공도서관)
+    // 휴무일 체크 (더 현실적인 설정)
+    let isHoliday = false;
+    let holidayReason = '';
+    
+    // 일요일 휴무 (일부 도서관)
     if (dayOfWeek === 0) {
-      return { isOpen: false, status: '휴무일', reason: '일요일 휴무' };
+      // 일부 도서관은 일요일에도 운영 (예: 중앙도서관)
+      const sundayOpenLibraries = ['경기도립중앙도서관', '수원시립중앙도서관', '성남시립중앙도서관'];
+      const isSundayOpen = sundayOpenLibraries.some(libName => 
+        hours.includes('09:00-22:00') || hours.includes('09:00-18:00')
+      );
+      
+      if (!isSundayOpen) {
+        isHoliday = true;
+        holidayReason = '일요일 휴무';
+      }
+    }
+    
+    // 월요일 휴무 (일부 도서관)
+    if (dayOfWeek === 1) {
+      const mondayClosedLibraries = ['영통구립도서관', '광교도서관', '팔달구립도서관'];
+      const isMondayClosed = mondayClosedLibraries.some(libName => 
+        hours.includes('09:00-20:00') || hours.includes('09:00-18:00')
+      );
+      
+      if (isMondayClosed) {
+        isHoliday = true;
+        holidayReason = '월요일 휴무';
+      }
+    }
+    
+    // 공휴일 체크 (간단한 예시)
+    const todayStr = today.toISOString().split('T')[0];
+    const holidays = [
+      '2024-01-01', // 신정
+      '2024-02-09', // 설날
+      '2024-02-10', // 설날
+      '2024-02-11', // 설날
+      '2024-03-01', // 삼일절
+      '2024-05-05', // 어린이날
+      '2024-06-06', // 현충일
+      '2024-08-15', // 광복절
+      '2024-10-03', // 개천절
+      '2024-10-09', // 한글날
+      '2024-12-25', // 크리스마스
+    ];
+    
+    if (holidays.includes(todayStr)) {
+      isHoliday = true;
+      holidayReason = '공휴일';
+    }
+    
+    if (isHoliday) {
+      return { isOpen: false, status: '휴무일', reason: holidayReason };
     }
     
     // 현재 시간이 운영 시간 내인지 확인

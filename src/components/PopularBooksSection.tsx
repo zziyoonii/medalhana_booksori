@@ -245,7 +245,14 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
       setApiError(null);
       
       const apiConfig = checkApiConfiguration();
+      console.log('🔧 API 설정 확인:', apiConfig);
       setApiEnabled(apiConfig);
+      
+      if (!apiConfig) {
+        console.error('❌ API 키가 설정되지 않았습니다.');
+        setApiError('API 키가 설정되지 않았습니다.');
+        return;
+      }
       
       // 이번주(월요일부터 일요일까지) 기준으로 계산
       const today = new Date();
@@ -267,8 +274,10 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
       const endDate = sunday.toISOString().split('T')[0]; // YYYY-MM-DD 형식
       
       console.log(`📅 이번주(${monday.toLocaleDateString()} ~ ${sunday.toLocaleDateString()}) 기준 인기도서 조회: ${startDate} ~ ${endDate}`);
+      console.log('🔑 API 키:', process.env.REACT_APP_LIBRARY_API_KEY ? '설정됨' : '설정되지 않음');
       
       const books = await fetchPopularBooks(startDate, endDate);
+      console.log('📚 받아온 인기도서:', books);
       setPopularBooks(books.slice(0, 5)); // Top 5만 표시
     } catch (error) {
       console.error('인기 도서 로딩 실패:', error);
@@ -292,6 +301,8 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
         {apiError ? (
           apiError.includes('활성화') ? 
           '⚠️ API 키가 아직 활성화되지 않았습니다. 도서관 정보나루에서 승인을 기다려주세요.' :
+          apiError.includes('IP 등록') ?
+          '⚠️ IP 제한으로 인해 더미 데이터를 표시합니다. (실제 API 사용을 위해 IP 등록이 필요합니다)' :
           `⚠️ API 오류: ${apiError}`
         ) : 
          apiEnabled ? '🔗 실제 도서관 API 연결 준비됨' : '📋 더미 데이터 사용 중 (API 키 설정 필요)'}

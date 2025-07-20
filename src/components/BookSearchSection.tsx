@@ -439,14 +439,21 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
       console.log(`📈 응답 개수: ${availability.length}개 도서관`);
       
       if (availability.length > 0) {
+        console.log(`✅ ISBN ${isbn}에 대한 소장 정보 ${availability.length}개 도서관에서 발견`);
         availability.forEach((lib, index) => {
           console.log(`📚 도서관 ${index + 1}: ${lib.libraryName}`);
           console.log(`   - 소장중: ${lib.available}`);
-          
+          console.log(`   - 대출가능: ${lib.loanable}`);
+          console.log(`   - 배가기호: ${lib.shelfLocation}`);
+          console.log(`   - 소장권수: ${lib.volumeCount}권`);
           console.log(`   - 도서관코드: ${lib.libraryId}`);
         });
       } else {
         console.warn(`⚠️ ISBN ${isbn}에 대한 소장 정보가 없습니다`);
+        console.log('🔍 API 응답 상세 분석:');
+        console.log('- availability 배열:', availability);
+        console.log('- 배열 길이:', availability.length);
+        console.log('- 배열 내용:', JSON.stringify(availability, null, 2));
       }
       
       return availability;

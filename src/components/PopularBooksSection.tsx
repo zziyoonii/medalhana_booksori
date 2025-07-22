@@ -335,7 +335,7 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
               </BookInfoCell>
               <DataCell className="desktop-only">{book.publisher}</DataCell>
               <DataCell className="tablet-hide">{book.publishYear}년</DataCell>
-              <LoanCountCell>{book.loanCount.toLocaleString()}회</LoanCountCell>
+              <LoanCountCell>{(book.loanCount || 0).toLocaleString()}회</LoanCountCell>
             </BookRow>
           ))}
         </BookTable>

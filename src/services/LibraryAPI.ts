@@ -470,7 +470,7 @@ export const fetchPopularBooks = async (
         author: book.author,
         publisher: book.publisher,
         isbn: book.isbn,
-        loanCount: book.loanCount,
+        loanCount: book.loanCount || 0,
         category: book.category,
         publishYear: book.publishYear
       }));

@@ -249,9 +249,9 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
       setApiEnabled(apiConfig);
       
       if (!apiConfig) {
-        console.error('❌ API 키가 설정되지 않았습니다.');
-        setApiError('API 키가 설정되지 않았습니다.');
-        return;
+        console.log('⚠️ API 키가 설정되지 않았습니다. 더미 데이터를 로드합니다.');
+        setApiError(null);
+        // API 키가 없어도 더미 데이터를 표시하기 위해 계속 진행
       }
       
       // 이번주(월요일부터 일요일까지) 기준으로 계산

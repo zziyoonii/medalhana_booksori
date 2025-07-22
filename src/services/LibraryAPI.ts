@@ -373,8 +373,59 @@ export const fetchPopularBooks = async (
     console.log('🔑 fetchPopularBooks - API 키 확인:', apiKey ? '설정됨' : '설정되지 않음');
     
     if (!apiKey) {
-      console.error('❌ API 키가 설정되지 않았습니다.');
-      return [];
+      console.log('⚠️ API 키가 설정되지 않았습니다. 더미 데이터를 반환합니다.');
+      return [
+        {
+          id: 'dummy1',
+          title: '데미안',
+          author: '헤르만 헤세',
+          publisher: '민음사',
+          isbn: '9788937473135',
+          loanCount: 156,
+          category: '소설',
+          publishYear: '2019'
+        },
+        {
+          id: 'dummy2',
+          title: '1984',
+          author: '조지 오웰',
+          publisher: '열린책들',
+          isbn: '9788932917245',
+          loanCount: 142,
+          category: '소설',
+          publishYear: '2018'
+        },
+        {
+          id: 'dummy3',
+          title: '동물농장',
+          author: '조지 오웰',
+          publisher: '열린책들',
+          isbn: '9788932917252',
+          loanCount: 128,
+          category: '소설',
+          publishYear: '2018'
+        },
+        {
+          id: 'dummy4',
+          title: '어린 왕자',
+          author: '생텍쥐페리',
+          publisher: '열린책들',
+          isbn: '9788932917269',
+          loanCount: 115,
+          category: '소설',
+          publishYear: '2017'
+        },
+        {
+          id: 'dummy5',
+          title: '노인과 바다',
+          author: '어니스트 헤밍웨이',
+          publisher: '민음사',
+          isbn: '9788937473142',
+          loanCount: 98,
+          category: '소설',
+          publishYear: '2016'
+        }
+      ];
     }
 
     // 동적 날짜 계산

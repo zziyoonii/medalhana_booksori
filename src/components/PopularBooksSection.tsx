@@ -278,7 +278,10 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
       
       const books = await fetchPopularBooks(startDate, endDate);
       console.log('📚 받아온 인기도서:', books);
+      console.log('📚 인기도서 개수:', books.length);
+      console.log('📚 인기도서 상세:', JSON.stringify(books, null, 2));
       setPopularBooks(books.slice(0, 5)); // Top 5만 표시
+      console.log('📚 설정된 인기도서:', books.slice(0, 5));
     } catch (error) {
       console.error('인기 도서 로딩 실패:', error);
       setApiError(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
@@ -317,28 +320,43 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
           📚 인기 도서를 불러오는 중...
         </LoadingContainer>
       ) : (
-        <BookTable>
-          <TableHeader>
-            <HeaderCell>순위</HeaderCell>
-            <HeaderCell>도서 정보</HeaderCell>
-            <HeaderCell className="desktop-only">출판사</HeaderCell>
-            <HeaderCell className="tablet-hide">출간년도</HeaderCell>
-            <HeaderCell>대출횟수</HeaderCell>
-          </TableHeader>
-          
-          {popularBooks.map((book, index) => (
-            <BookRow key={book.id} onClick={() => onBookClick(book)}>
-              <RankCell>{index + 1}</RankCell>
-              <BookInfoCell>
-                <BookTitle>{book.title}</BookTitle>
-                <BookAuthor>{book.author}</BookAuthor>
-              </BookInfoCell>
-              <DataCell className="desktop-only">{book.publisher}</DataCell>
-              <DataCell className="tablet-hide">{book.publishYear}년</DataCell>
-              <LoanCountCell>{(book.loanCount || 0).toLocaleString()}회</LoanCountCell>
-            </BookRow>
-          ))}
-        </BookTable>
+        <>
+          {console.log('🎨 렌더링 - popularBooks:', popularBooks)}
+          {console.log('🎨 렌더링 - popularBooks 길이:', popularBooks.length)}
+          <BookTable>
+            <TableHeader>
+              <HeaderCell>순위</HeaderCell>
+              <HeaderCell>도서 정보</HeaderCell>
+              <HeaderCell className="desktop-only">출판사</HeaderCell>
+              <HeaderCell className="tablet-hide">출간년도</HeaderCell>
+              <HeaderCell>대출횟수</HeaderCell>
+            </TableHeader>
+            
+            {popularBooks.length > 0 ? (
+              popularBooks.map((book, index) => {
+                console.log('📖 렌더링 도서:', book);
+                return (
+                  <BookRow key={book.id} onClick={() => onBookClick(book)}>
+                    <RankCell>{index + 1}</RankCell>
+                    <BookInfoCell>
+                      <BookTitle>{book.title}</BookTitle>
+                      <BookAuthor>{book.author}</BookAuthor>
+                    </BookInfoCell>
+                    <DataCell className="desktop-only">{book.publisher}</DataCell>
+                    <DataCell className="tablet-hide">{book.publishYear}년</DataCell>
+                    <LoanCountCell>{(book.loanCount || 0).toLocaleString()}회</LoanCountCell>
+                  </BookRow>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '20px' }}>
+                  📚 인기 도서를 불러올 수 없습니다.
+                </td>
+              </tr>
+            )}
+          </BookTable>
+        </>
       )}
     </PopularBooksContainer>
   );

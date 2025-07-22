@@ -374,7 +374,7 @@ export const fetchPopularBooks = async (
     
     if (!apiKey) {
       console.log('⚠️ API 키가 설정되지 않았습니다. 더미 데이터를 반환합니다.');
-      return [
+      const dummyData = [
         {
           id: 'dummy1',
           title: '데미안',
@@ -426,6 +426,8 @@ export const fetchPopularBooks = async (
           publishYear: '2016'
         }
       ];
+      console.log('🎭 더미 데이터 반환:', dummyData);
+      return dummyData;
     }
 
     // 동적 날짜 계산

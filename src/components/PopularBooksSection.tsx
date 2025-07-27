@@ -108,28 +108,13 @@ const BookRow = styled.div`
 `;
 
 const RankCell = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: var(--primary-color);
-  color: white;
-  border-radius: 50%;
   font-weight: 600;
-  font-size: 16px;
-  margin: 0 auto;
-  
-  @media (max-width: 768px) {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
-  }
+  color: var(--primary-color);
+  text-align: center;
+  font-size: 18px;
   
   @media (max-width: 480px) {
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
+    font-size: 16px;
   }
 `;
 
@@ -137,18 +122,12 @@ const BookInfoCell = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
-  text-align: left;
 `;
 
 const BookTitle = styled.div`
-  font-size: 16px;
   font-weight: 600;
-  color: #2c3e50;
-  line-height: 1.3;
-  
-  @media (max-width: 768px) {
-    font-size: 15px;
-  }
+  color: #333;
+  font-size: 16px;
   
   @media (max-width: 480px) {
     font-size: 14px;
@@ -156,12 +135,8 @@ const BookTitle = styled.div`
 `;
 
 const BookAuthor = styled.div`
+  color: #666;
   font-size: 14px;
-  color: #7f8c8d;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
   
   @media (max-width: 480px) {
     font-size: 12px;
@@ -170,62 +145,80 @@ const BookAuthor = styled.div`
 
 const DataCell = styled.div`
   text-align: center;
+  color: #555;
   font-size: 14px;
-  color: #2c3e50;
-  font-weight: 500;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
   
   @media (max-width: 480px) {
     font-size: 12px;
   }
 `;
 
-const LoanCountCell = styled(DataCell)`
+const LoanCountCell = styled.div`
+  text-align: center;
   font-weight: 600;
-  color: var(--primary-color);
+  color: #e74c3c;
+  font-size: 14px;
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+  }
 `;
 
-const Description = styled.p`
-  font-size: 16px;
-  color: #7f8c8d;
-  text-align: center;
-  margin-bottom: 20px;
-  line-height: 1.5;
+const Description = styled.div`
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
+`;
+
+const ApiStatus = styled.div<{ isError: boolean }>`
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  background: ${props => props.isError ? '#fff3cd' : '#d1ecf1'};
+  color: ${props => props.isError ? '#856404' : '#0c5460'};
+  border: 1px solid ${props => props.isError ? '#ffeaa7' : '#bee5eb'};
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+`;
+
+const ClickGuide = styled.div`
+  background: #e8f5e8;
+  color: #2d5a2d;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  border: 1px solid #c3e6c3;
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
 `;
 
 const LoadingContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-  color: #7f8c8d;
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
   font-size: 16px;
-`;
-
-const ApiStatus = styled.div<{ isError?: boolean }>`
-  font-size: 12px;
-  color: ${props => props.isError ? '#dc3545' : '#6c757d'};
-  text-align: center;
-  margin-bottom: 10px;
-  padding: 5px 10px;
-  background: ${props => props.isError ? '#f8d7da' : '#f8f9fa'};
-  border-radius: 4px;
-  border: 1px solid ${props => props.isError ? '#f5c6cb' : '#e9ecef'};
-`;
-
-const ClickGuide = styled.p`
-  font-size: 14px;
-  color: var(--primary-color);
-  text-align: center;
-  margin-bottom: 20px;
-  font-weight: 500;
-  background: #f0f8f0;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #e6f3e6;
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+    padding: 30px 15px;
+  }
 `;
 
 interface PopularBooksSectionProps {
@@ -254,26 +247,23 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
         // API 키가 없어도 더미 데이터를 표시하기 위해 계속 진행
       }
       
-      // 이번주(월요일부터 일요일까지) 기준으로 계산
+      // 지난주(월요일부터 일요일까지) 기준으로 계산
       const today = new Date();
       
-      // 이번주 월요일 계산
-      const monday = new Date(today);
+      // 지난주 월요일 계산
+      const lastMonday = new Date(today);
       const dayOfWeek = today.getDay(); // 0=일요일, 1=월요일, ..., 6=토요일
-      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 월요일까지의 일수
-      monday.setDate(today.getDate() - daysToMonday);
+      const daysToLastMonday = dayOfWeek === 0 ? 13 : dayOfWeek + 6; // 지난주 월요일까지의 일수
+      lastMonday.setDate(today.getDate() - daysToLastMonday);
       
-      // 이번주 일요일 계산 (오늘이 일요일이면 오늘, 아니면 다음 일요일)
-      const sunday = new Date(today);
-      if (dayOfWeek !== 0) { // 오늘이 일요일이 아니면
-        const daysToSunday = 7 - dayOfWeek;
-        sunday.setDate(today.getDate() + daysToSunday);
-      }
+      // 지난주 일요일 계산
+      const lastSunday = new Date(lastMonday);
+      lastSunday.setDate(lastMonday.getDate() + 6); // 월요일 + 6일 = 일요일
       
-      const startDate = monday.toISOString().split('T')[0]; // YYYY-MM-DD 형식
-      const endDate = sunday.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+      const startDate = lastMonday.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+      const endDate = lastSunday.toISOString().split('T')[0]; // YYYY-MM-DD 형식
       
-      console.log(`📅 이번주(${monday.toLocaleDateString()} ~ ${sunday.toLocaleDateString()}) 기준 인기도서 조회: ${startDate} ~ ${endDate}`);
+      console.log(`📅 지난주(${lastMonday.toLocaleDateString()} ~ ${lastSunday.toLocaleDateString()}) 기준 인기도서 조회: ${startDate} ~ ${endDate}`);
       console.log('🔑 API 키:', process.env.REACT_APP_LIBRARY_API_KEY ? '설정됨' : '설정되지 않음');
       
       const books = await fetchPopularBooks(startDate, endDate);
@@ -297,7 +287,7 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
   return (
     <PopularBooksContainer>
       <Description>
-        📊 이번주 대출 인기 순위 TOP 5 (성인 대상)
+        📊 지난주 대출 인기 순위 TOP 5 (성인 대상)
       </Description>
       
       <ApiStatus isError={!!apiError}>
@@ -336,7 +326,7 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
               popularBooks.map((book, index) => {
                 console.log('📖 렌더링 도서:', book);
                 return (
-                  <BookRow key={book.id} onClick={() => onBookClick(book)}>
+                  <BookRow key={book.id || `book-${index}-${book.isbn}`} onClick={() => onBookClick(book)}>
                     <RankCell>{index + 1}</RankCell>
                     <BookInfoCell>
                       <BookTitle>{book.title}</BookTitle>
@@ -349,11 +339,16 @@ const PopularBooksSection: React.FC<PopularBooksSectionProps> = ({ onBookClick, 
                 );
               })
             ) : (
-              <tr>
-                <td colSpan={5} style={{ textAlign: 'center', padding: '20px' }}>
+              <BookRow key="no-data">
+                <div style={{ 
+                  gridColumn: '1 / -1', 
+                  textAlign: 'center', 
+                  padding: '20px',
+                  color: '#666'
+                }}>
                   📚 인기 도서를 불러올 수 없습니다.
-                </td>
-              </tr>
+                </div>
+              </BookRow>
             )}
           </BookTable>
         </>

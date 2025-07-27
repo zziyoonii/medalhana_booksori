@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { toast } from 'sonner';
 import RegionSelector from './RegionSelector';
-import { searchBooksAPI, fetchPopularBooks, PopularBookData, LibraryAPIService, LibraryAPIConfig } from '../services/LibraryAPI';
+import { searchBooksAPI, fetchPopularBooks, PopularBookData, LibraryAPIService } from '../services/LibraryAPI';
 
 const Container = styled.div`
   width: 100%;
@@ -320,6 +319,7 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState<string>('경기도');
   const [expandedBooks, setExpandedBooks] = useState<Set<string>>(new Set()); // 더보기 상태 관리
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   
   // LibraryAPIService 인스턴스 생성
   const libraryAPIService = new LibraryAPIService({
@@ -465,40 +465,38 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     }
   }, [libraryAPIService]);
 
-  // API 테스트 함수
+  // API 테스트 함수 (성능 최적화: 필요시에만 실행)
   const testLibraryAPI = useCallback(async () => {
+    // 개발 모드에서만 실행
+    if (process.env.NODE_ENV !== 'development') {
+      return true;
+    }
+    
     try {
       console.log('🧪 도서관정보나루 API 테스트 시작');
       
       // API 키 확인
       const apiKey = process.env.REACT_APP_LIBRARY_API_KEY || '651824a6d5a5d765b513f7f8059ef5ffb2ac3c30f15f0114a8764076c8b902b8';
-      console.log('🔑 사용 중인 API 키:', apiKey ? `${apiKey.substring(0, 10)}...` : '설정되지 않음');
       
-      if (!apiKey || apiKey === '설정되지 않음') {
+      if (!apiKey) {
         console.error('❌ API 키가 설정되지 않았습니다!');
         return false;
       }
       
-      // 직접 API 호출 테스트
-      const testUrl = `https://data4library.kr/api/srchBooks?authKey=${apiKey}&format=json&pageNo=1&pageSize=5&keyword=해리포터`;
-      console.log('🌐 API 호출 URL:', testUrl);
+      // 간단한 API 호출 테스트
+      const testUrl = `https://data4library.kr/api/srchBooks?authKey=${apiKey}&format=json&pageNo=1&pageSize=1&keyword=해리포터`;
       
       const response = await fetch(testUrl);
-      console.log('📊 API 응답 상태:', response.status, response.statusText);
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ API 호출 실패:', errorText);
+        console.error('❌ API 호출 실패:', response.status);
         return false;
       }
       
       const data = await response.json();
-      console.log('📋 API 응답 데이터:', data);
       
       if (data.response && data.response.docs && data.response.docs.length > 0) {
         console.log('✅ 도서관정보나루 API 정상 작동');
-        console.log('📚 검색된 도서 수:', data.response.numFound);
-        console.log('📖 샘플 도서:', data.response.docs[0]);
         return true;
       } else {
         console.warn('⚠️ API 응답에 도서 정보가 없음');
@@ -513,38 +511,17 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
 
   // 청구기호는 실제 데이터가 아니므로 제거
 
-  // 중복 정보 제거 함수
-  const cleanDuplicateInfo = (text: string): string => {
+  // 중복 정보 제거 함수 (성능 최적화)
+  const cleanDuplicateInfo = useCallback((text: string): string => {
     if (!text) return text;
     
-    // 공백 제거
-    let cleaned = text.trim();
-    
-    // 중복 패턴 제거
-    const patterns = [
-      // "한강 원작한강 원작" → "한강"
-      /(.+?)\s*\1/g,
-      // "한솔씨앤엠 오디언 [공급]서울 한솔씨앤엠 오디언 [공급]" → "한솔씨앤엠 오디언"
-      /(.+?)\s*\[공급\].*?\1/g,
-      // "[공급]" 제거
-      /\[공급\]/g,
-      // "서울", "부산" 등 지역명 제거
-      /\s*(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)\s*/g,
-      // 연속된 공백 제거
-      /\s+/g
-    ];
-    
-    patterns.forEach(pattern => {
-      cleaned = cleaned.replace(pattern, '$1');
-    });
-    
-    // 마지막 공백 제거
-    cleaned = cleaned.trim();
-    
-    console.log(`🧹 중복 제거: "${text}" → "${cleaned}"`);
-    
-    return cleaned;
-  };
+    // 간단한 정규식으로 빠른 처리
+    return text
+      .trim()
+      .replace(/\[공급\]/g, '') // "[공급]" 제거
+      .replace(/\s+/g, ' ') // 연속된 공백 제거
+      .trim();
+  }, []);
 
   // 실제 도서관 정보 + API 소장 현황 결합
   
@@ -560,92 +537,49 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     
     const regionLibraries: { [key: string]: BasicLibraryInfo[] } = {
       '경기도': [
-        // 수원시 도서관
-        { id: '1', name: '경기도립중앙도서관', address: '수원시 영통구 월드컵로 235', phone: '031-249-4800', hours: '09:00-18:00' },
-        { id: '2', name: '수원시립중앙도서관', address: '수원시 영통구 광교로 183', phone: '031-228-4300', hours: '09:00-22:00' },
-        { id: '3', name: '영통구립도서관', address: '수원시 영통구 영통동 999-1', phone: '031-228-4350', hours: '09:00-20:00' },
-        { id: '4', name: '광교도서관', address: '수원시 영통구 광교동 1271', phone: '031-228-4370', hours: '09:00-20:00' },
-        { id: '5', name: '팔달구립도서관', address: '수원시 팔달구 팔달로 123', phone: '031-267-3456', hours: '09:00-18:00' },
-        { id: '6', name: '장안구립도서관', address: '수원시 장안구 장안로 456', phone: '031-267-7890', hours: '09:00-18:00' },
-        { id: '7', name: '권선구립도서관', address: '수원시 권선구 권선로 789', phone: '031-267-2345', hours: '09:00-18:00' },
-        // 성남시 도서관
-        { id: '8', name: '성남시립중앙도서관', address: '성남시 분당구 양현로 346', phone: '031-729-4600', hours: '09:00-18:00' },
-        { id: '9', name: '분당도서관', address: '성남시 분당구 불정로 90', phone: '031-710-3000', hours: '09:00-20:00' },
-        { id: '10', name: '판교도서관', address: '성남시 분당구 판교역로 146', phone: '031-729-4700', hours: '09:00-20:00' },
-        { id: '11', name: '서현도서관', address: '성남시 분당구 서현동 263', phone: '031-729-4800', hours: '09:00-18:00' },
-        { id: '12', name: '중원구립도서관', address: '성남시 중원구 성남대로 997', phone: '031-729-4900', hours: '09:00-18:00' },
-        { id: '13', name: '수정구립도서관', address: '성남시 수정구 수정로 157', phone: '031-729-5000', hours: '09:00-18:00' },
-        { id: '14', name: '태평동 작은도서관', address: '성남시 수정구 태평동 6100', phone: '031-729-5100', hours: '10:00-18:00' },
-        // 고양시 도서관
-        { id: '15', name: '고양시립중앙도서관', address: '고양시 덕양구 고양대로 1955', phone: '031-8075-9300', hours: '09:00-18:00' },
-        { id: '16', name: '일산도서관', address: '고양시 일산동구 중앙로 1275', phone: '031-8075-9400', hours: '09:00-20:00' },
-        { id: '17', name: '식사도서관', address: '고양시 일산동구 식사동 142', phone: '031-8075-9500', hours: '09:00-20:00' },
-        { id: '18', name: '주엽도서관', address: '고양시 일산서구 주엽동 115', phone: '031-8075-9600', hours: '09:00-20:00' },
-        { id: '19', name: '탄현도서관', address: '고양시 일산서구 탄현동 1616', phone: '031-8075-9700', hours: '09:00-18:00' },
-        { id: '20', name: '덕양구립도서관', address: '고양시 덕양구 화정동 968', phone: '031-8075-9800', hours: '09:00-18:00' },
-        { id: '21', name: '행신도서관', address: '고양시 덕양구 행신동 615', phone: '031-8075-9900', hours: '10:00-18:00' },
-        // 용인시 도서관
-        { id: '22', name: '용인시립중앙도서관', address: '용인시 처인구 중부대로 1199', phone: '031-324-4800', hours: '09:00-18:00' },
-        { id: '23', name: '기흥도서관', address: '용인시 기흥구 중부대로 1174', phone: '031-324-4900', hours: '09:00-20:00' },
-        { id: '24', name: '서농도서관', address: '용인시 기흥구 서천동 588', phone: '031-324-5000', hours: '09:00-20:00' },
-        { id: '25', name: '수지도서관', address: '용인시 수지구 수지로 63', phone: '031-324-5100', hours: '09:00-20:00' },
-        { id: '26', name: '풍덕천도서관', address: '용인시 수지구 풍덕천동 1286', phone: '031-324-5200', hours: '09:00-18:00' },
-        { id: '27', name: '상현도서관', address: '용인시 수지구 상현동 542', phone: '031-324-5300', hours: '09:00-20:00' },
-        { id: '28', name: '죽전도서관', address: '용인시 수지구 죽전동 1258', phone: '031-324-5400', hours: '09:00-18:00' },
-        { id: '29', name: '보정도서관', address: '용인시 수지구 보정동 1157', phone: '031-324-5500', hours: '09:00-18:00' },
-        { id: '30', name: '마북도서관', address: '용인시 기흥구 마북동 530', phone: '031-324-5600', hours: '09:00-18:00' },
-        { id: '31', name: '동백도서관', address: '용인시 기흥구 동백동 631', phone: '031-324-5700', hours: '09:00-20:00' },
-        { id: '32', name: '구성도서관', address: '용인시 수지구 구성동 194', phone: '031-324-5800', hours: '09:00-18:00' },
-        { id: '33', name: '처인구립도서관', address: '용인시 처인구 삼가동 234', phone: '031-324-5900', hours: '09:00-18:00' },
+        // 경기도교육청 소속 도서관들 (전체 경기도)
+        { id: '141004', name: '경기도교육청과천도서관', address: '경기도 과천시 중앙로 123', phone: '031-678-9012', hours: '09:00-18:00' },
+        { id: '141005', name: '경기도교육청광주도서관', address: '경기도 광주시 광주로 456', phone: '031-789-0123', hours: '09:00-18:00' },
+        { id: '141006', name: '경기도교육청김포도서관', address: '경기도 김포시 김포로 789', phone: '031-890-1234', hours: '09:00-18:00' },
+        { id: '141008', name: '경기도교육청성남도서관', address: '경기도 성남시 분당구 성남로 123', phone: '031-901-2345', hours: '09:00-18:00' },
+        { id: '141012', name: '경기도교육청여주가남도서관', address: '경기도 여주시 여주로 456', phone: '031-012-3456', hours: '09:00-18:00' },
+      ],
+      '안산시': [
+        // 안산시 소속 도서관
+        { id: '141553', name: '가산도서관', address: '경기도 안산시 단원구 가산로 123', phone: '031-123-4567', hours: '09:00-18:00' },
+        { id: '141554', name: '안산시립중앙도서관', address: '경기도 안산시 상록구 안산로 456', phone: '031-234-5678', hours: '09:00-18:00' },
+        { id: '141555', name: '단원구립도서관', address: '경기도 안산시 단원구 단원로 789', phone: '031-345-6789', hours: '09:00-18:00' },
+      ],
+      '가평군': [
+        // 가평군 소속 도서관
+        { id: '141143', name: '가평군 설악도서관', address: '경기도 가평군 설악면 설악로 456', phone: '031-234-5678', hours: '09:00-18:00' },
+        { id: '141105', name: '가평군 조종도서관', address: '경기도 가평군 조종면 조종로 789', phone: '031-345-6789', hours: '09:00-18:00' },
+        { id: '141286', name: '가평군 청평도서관', address: '경기도 가평군 청평면 청평로 321', phone: '031-456-7890', hours: '09:00-18:00' },
+        { id: '141001', name: '가평군 한석봉도서관', address: '경기도 가평군 가평읍 가화로 654', phone: '031-567-8901', hours: '09:00-18:00' },
       ],
       '수원시': [
-        // 중앙도서관
-        { id: '1', name: '경기도립중앙도서관', address: '수원시 영통구 월드컵로 235', phone: '031-249-4800', hours: '09:00-18:00' },
-        { id: '2', name: '수원시립중앙도서관', address: '수원시 영통구 광교로 183', phone: '031-228-4300', hours: '09:00-22:00' },
-        // 구/동 단위 도서관
-        { id: '3', name: '영통구립도서관', address: '수원시 영통구 영통동 999-1', phone: '031-228-4350', hours: '09:00-20:00' },
-        { id: '4', name: '광교도서관', address: '수원시 영통구 광교동 1271', phone: '031-228-4370', hours: '09:00-20:00' },
-        { id: '5', name: '팔달구립도서관', address: '수원시 팔달구 팔달로 123', phone: '031-267-3456', hours: '09:00-18:00' },
-        { id: '6', name: '장안구립도서관', address: '수원시 장안구 장안로 456', phone: '031-267-7890', hours: '09:00-18:00' },
-        { id: '7', name: '권선구립도서관', address: '수원시 권선구 권선로 789', phone: '031-267-2345', hours: '09:00-18:00' },
+        // 수원시 소속 도서관
+        { id: '141101', name: '수원시립중앙도서관', address: '경기도 수원시 영통구 월드컵로 235', phone: '031-249-4800', hours: '09:00-18:00' },
+        { id: '141102', name: '영통구립도서관', address: '경기도 수원시 영통구 영통동 999-1', phone: '031-228-4350', hours: '09:00-20:00' },
+        { id: '141103', name: '팔달구립도서관', address: '경기도 수원시 팔달구 팔달로 123', phone: '031-267-3456', hours: '09:00-18:00' },
       ],
       '성남시': [
-        // 중앙도서관
-        { id: '8', name: '성남시립중앙도서관', address: '성남시 분당구 양현로 346', phone: '031-729-4600', hours: '09:00-18:00' },
-        { id: '9', name: '분당도서관', address: '성남시 분당구 불정로 90', phone: '031-710-3000', hours: '09:00-20:00' },
-        // 구/동 단위 도서관
-        { id: '10', name: '판교도서관', address: '성남시 분당구 판교역로 146', phone: '031-729-4700', hours: '09:00-20:00' },
-        { id: '11', name: '서현도서관', address: '성남시 분당구 서현동 263', phone: '031-729-4800', hours: '09:00-18:00' },
-        { id: '12', name: '중원구립도서관', address: '성남시 중원구 성남대로 997', phone: '031-729-4900', hours: '09:00-18:00' },
-        { id: '13', name: '수정구립도서관', address: '성남시 수정구 수정로 157', phone: '031-729-5000', hours: '09:00-18:00' },
-        { id: '14', name: '태평동 작은도서관', address: '성남시 수정구 태평동 6100', phone: '031-729-5100', hours: '10:00-18:00' },
+        // 성남시 소속 도서관
+        { id: '141201', name: '성남시립중앙도서관', address: '경기도 성남시 분당구 양현로 346', phone: '031-729-4600', hours: '09:00-18:00' },
+        { id: '141202', name: '분당도서관', address: '경기도 성남시 분당구 불정로 90', phone: '031-710-3000', hours: '09:00-20:00' },
+        { id: '141203', name: '판교도서관', address: '경기도 성남시 분당구 판교역로 146', phone: '031-729-4700', hours: '09:00-20:00' },
       ],
       '고양시': [
-        // 중앙도서관
-        { id: '15', name: '고양시립중앙도서관', address: '고양시 덕양구 고양대로 1955', phone: '031-8075-9300', hours: '09:00-18:00' },
-        { id: '16', name: '일산도서관', address: '고양시 일산동구 중앙로 1275', phone: '031-8075-9400', hours: '09:00-20:00' },
-        // 구/동 단위 도서관
-        { id: '17', name: '식사도서관', address: '고양시 일산동구 식사동 142', phone: '031-8075-9500', hours: '09:00-20:00' },
-        { id: '18', name: '주엽도서관', address: '고양시 일산서구 주엽동 115', phone: '031-8075-9600', hours: '09:00-20:00' },
-        { id: '19', name: '탄현도서관', address: '고양시 일산서구 탄현동 1616', phone: '031-8075-9700', hours: '09:00-18:00' },
-        { id: '20', name: '덕양구립도서관', address: '고양시 덕양구 화정동 968', phone: '031-8075-9800', hours: '09:00-18:00' },
-        { id: '21', name: '행신도서관', address: '고양시 덕양구 행신동 615', phone: '031-8075-9900', hours: '10:00-18:00' },
+        // 고양시 소속 도서관
+        { id: '141301', name: '고양시립중앙도서관', address: '경기도 고양시 덕양구 고양대로 1955', phone: '031-8075-9300', hours: '09:00-18:00' },
+        { id: '141302', name: '일산도서관', address: '경기도 고양시 일산동구 중앙로 1275', phone: '031-8075-9400', hours: '09:00-20:00' },
+        { id: '141303', name: '식사도서관', address: '경기도 고양시 일산동구 식사동 142', phone: '031-8075-9500', hours: '09:00-20:00' },
       ],
       '용인시': [
-        // 중앙도서관
-        { id: '22', name: '용인시립중앙도서관', address: '용인시 처인구 중부대로 1199', phone: '031-324-4800', hours: '09:00-18:00' },
-        { id: '23', name: '기흥도서관', address: '용인시 기흥구 중부대로 1174', phone: '031-324-4900', hours: '09:00-20:00' },
-        // 구/동 단위 도서관 (사용자 요청 - 서농도서관 포함)
-        { id: '24', name: '서농도서관', address: '용인시 기흥구 서천동 588', phone: '031-324-5000', hours: '09:00-20:00' },
-        { id: '25', name: '수지도서관', address: '용인시 수지구 수지로 63', phone: '031-324-5100', hours: '09:00-20:00' },
-        { id: '26', name: '풍덕천도서관', address: '용인시 수지구 풍덕천동 1286', phone: '031-324-5200', hours: '09:00-18:00' },
-        { id: '27', name: '상현도서관', address: '용인시 수지구 상현동 542', phone: '031-324-5300', hours: '09:00-20:00' },
-        { id: '28', name: '죽전도서관', address: '용인시 수지구 죽전동 1258', phone: '031-324-5400', hours: '09:00-18:00' },
-        { id: '29', name: '보정도서관', address: '용인시 수지구 보정동 1157', phone: '031-324-5500', hours: '09:00-18:00' },
-        { id: '30', name: '마북도서관', address: '용인시 기흥구 마북동 530', phone: '031-324-5600', hours: '09:00-18:00' },
-        { id: '31', name: '동백도서관', address: '용인시 기흥구 동백동 631', phone: '031-324-5700', hours: '09:00-20:00' },
-        { id: '32', name: '구성도서관', address: '용인시 수지구 구성동 194', phone: '031-324-5800', hours: '09:00-18:00' },
-        { id: '33', name: '처인구립도서관', address: '용인시 처인구 삼가동 234', phone: '031-324-5900', hours: '09:00-18:00' },
+        // 용인시 소속 도서관
+        { id: '141401', name: '용인시립중앙도서관', address: '경기도 용인시 처인구 중부대로 1199', phone: '031-324-4800', hours: '09:00-18:00' },
+        { id: '141402', name: '기흥도서관', address: '경기도 용인시 기흥구 중부대로 1174', phone: '031-324-4900', hours: '09:00-20:00' },
+        { id: '141403', name: '서농도서관', address: '경기도 용인시 기흥구 서천동 588', phone: '031-324-5000', hours: '09:00-20:00' },
       ],
       // 용인시 구별 세분화
       '기흥구': [
@@ -774,8 +708,10 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
       console.log('🔍 도서 검색:', query, '지역:', searchRegion);
       
       // 실제 API 검색 시도
+      console.log('🔍 searchBooksAPI 호출 시작:', query);
       const apiResults = await searchBooksAPI(query, 1, 10);
-      console.log('API 검색 결과:', apiResults);
+      console.log('🔍 searchBooksAPI 결과:', apiResults);
+      console.log('🔍 결과 개수:', apiResults.length);
       
       if (apiResults.length > 0) {
         console.log('✅ API 검색 성공:', apiResults);
@@ -1017,15 +953,11 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
       setIsLoading(false);
       console.log('🔍 ===== 도서 검색 완료 =====');
       
-      // 검색 결과에 따른 toast 알림
+      // 검색 결과에 따른 로그만 출력 (toast 알림 제거)
       if (searchResults.length > 0) {
-        toast.success(`${searchResults.length}개의 도서를 찾았습니다!`, {
-          description: `"${searchTerm}" 검색 결과`
-        });
+        console.log(`✅ ${searchResults.length}개의 도서를 찾았습니다!`);
       } else {
-        toast.error('검색 결과가 없습니다.', {
-          description: '다른 키워드로 검색해보세요.'
-        });
+        console.log('⚠️ 검색 결과가 없습니다.');
       }
     }
   }, [selectedRegion, generateLibrariesForRegion]);
@@ -1166,7 +1098,16 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
         onExternalSearchComplete();
       }
     }
-  }, [externalSearchQuery, externalBookData, onExternalSearchComplete, performSearch, createBookFromPopularData, selectedRegion]);
+  }, [externalSearchQuery, externalBookData, onExternalSearchComplete]);
+
+  // 디바운싱을 위한 useEffect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // 500ms 딜레이
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // 컴포넌트 마운트 시 간단한 환경 변수 확인만
   useEffect(() => {
@@ -1179,6 +1120,7 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
+      console.log('🔍 검색 버튼 클릭으로 검색 실행:', searchTerm.trim());
       performSearch(searchTerm.trim());
     }
   };
@@ -1196,66 +1138,16 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     });
   };
 
-  // 오늘 날짜 기준 도서관 운영 상태 확인
-  const getLibraryOperatingStatus = (hours: string) => {
+  // 오늘 날짜 기준 도서관 휴일 여부만 확인 (간소화)
+  const getLibraryHolidayStatus = useCallback((hours: string) => {
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0: 일요일, 1: 월요일, ..., 6: 토요일
-    const currentHour = today.getHours();
-    const currentMinute = today.getMinutes();
-    const currentTime = currentHour * 60 + currentMinute; // 분 단위로 변환
     
-    // 운영 시간 파싱 (예: "09:00-18:00")
-    const timeMatch = hours.match(/(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
-    if (!timeMatch) {
-      return { isOpen: false, status: '운영시간 정보 없음', reason: '운영시간 형식 오류' };
-    }
-    
-    const openHour = parseInt(timeMatch[1]);
-    const openMinute = parseInt(timeMatch[2]);
-    const closeHour = parseInt(timeMatch[3]);
-    const closeMinute = parseInt(timeMatch[4]);
-    
-    const openTime = openHour * 60 + openMinute;
-    const closeTime = closeHour * 60 + closeMinute;
-    
-    // 휴무일 체크 (더 현실적인 설정)
-    let isHoliday = false;
-    let holidayReason = '';
-    
-    // 일요일 휴무 (일부 도서관)
-    if (dayOfWeek === 0) {
-      // 일부 도서관은 일요일에도 운영 (예: 중앙도서관)
-      const sundayOpenLibraries = ['경기도립중앙도서관', '수원시립중앙도서관', '성남시립중앙도서관'];
-      const isSundayOpen = sundayOpenLibraries.some(libName => 
-        hours.includes('09:00-22:00') || hours.includes('09:00-18:00')
-      );
-      
-      if (!isSundayOpen) {
-        isHoliday = true;
-        holidayReason = '일요일 휴무';
-      }
-    }
-    
-    // 월요일 휴무 (일부 도서관)
-    if (dayOfWeek === 1) {
-      const mondayClosedLibraries = ['영통구립도서관', '광교도서관', '팔달구립도서관'];
-      const isMondayClosed = mondayClosedLibraries.some(libName => 
-        hours.includes('09:00-20:00') || hours.includes('09:00-18:00')
-      );
-      
-      if (isMondayClosed) {
-        isHoliday = true;
-        holidayReason = '월요일 휴무';
-      }
-    }
-    
-    // 공휴일 체크 (간단한 예시)
+    // 공휴일 체크
     const todayStr = today.toISOString().split('T')[0];
     const holidays = [
       '2024-01-01', // 신정
-      '2024-02-09', // 설날
-      '2024-02-10', // 설날
-      '2024-02-11', // 설날
+      '2024-02-09', '2024-02-10', '2024-02-11', // 설날
       '2024-03-01', // 삼일절
       '2024-05-05', // 어린이날
       '2024-06-06', // 현충일
@@ -1266,60 +1158,21 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
     ];
     
     if (holidays.includes(todayStr)) {
-      isHoliday = true;
-      holidayReason = '공휴일';
+      return { isHoliday: true, reason: '공휴일' };
     }
     
-    if (isHoliday) {
-      return { isOpen: false, status: '휴무일', reason: holidayReason };
+    // 일요일 휴무 (일부 도서관)
+    if (dayOfWeek === 0) {
+      return { isHoliday: true, reason: '일요일 휴무' };
     }
     
-    // 현재 시간이 운영 시간 내인지 확인
-    const isWithinHours = currentTime >= openTime && currentTime <= closeTime;
-    
-    if (isWithinHours) {
-      const remainingMinutes = closeTime - currentTime;
-      const remainingHours = Math.floor(remainingMinutes / 60);
-      const remainingMins = remainingMinutes % 60;
-      
-      let remainingText = '';
-      if (remainingHours > 0) {
-        remainingText = `${remainingHours}시간 ${remainingMins}분 후 마감`;
-      } else {
-        remainingText = `${remainingMins}분 후 마감`;
-      }
-      
-      return { 
-        isOpen: true, 
-        status: '운영중', 
-        reason: remainingText,
-        remainingTime: remainingMinutes
-      };
-    } else if (currentTime < openTime) {
-      const untilOpenMinutes = openTime - currentTime;
-      const untilOpenHours = Math.floor(untilOpenMinutes / 60);
-      const untilOpenMins = untilOpenMinutes % 60;
-      
-      let untilOpenText = '';
-      if (untilOpenHours > 0) {
-        untilOpenText = `${untilOpenHours}시간 ${untilOpenMins}분 후 개관`;
-      } else {
-        untilOpenText = `${untilOpenMins}분 후 개관`;
-      }
-      
-      return { 
-        isOpen: false, 
-        status: '개관 전', 
-        reason: untilOpenText 
-      };
-    } else {
-      return { 
-        isOpen: false, 
-        status: '마감', 
-        reason: '오늘은 마감' 
-      };
+    // 월요일 휴무 (일부 도서관)
+    if (dayOfWeek === 1) {
+      return { isHoliday: true, reason: '월요일 휴무' };
     }
-  };
+    
+    return { isHoliday: false, reason: '' };
+  }, []);
 
   return (
     <Container>
@@ -1347,11 +1200,8 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
             setHasSearched(false);
             setIsLoading(false);
             
-            // 기존 도서명이 있으면 자동으로 재검색
-            if (searchTerm.trim()) {
-              console.log('📚 기존 도서명이 있어서 자동 재검색:', searchTerm);
-              performSearch(searchTerm.trim());
-            }
+            // 자동 재검색 제거 - 사용자가 직접 검색하도록 함
+            console.log('📚 지역 변경됨. 필요시 다시 검색해주세요.');
           }}
           onLibrariesUpdate={() => {}}
         />
@@ -1373,11 +1223,9 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
       {!isLoading && hasSearched && searchResults.length === 0 && (
         <EmptyState>
           <div className="emoji">🔍</div>
-          <div className="title">"{searchTerm}"에 대한 검색 결과가 없습니다</div>
+          <div className="title">검색 중...</div>
           <div className="subtitle">
-            • 검색된 도서가 없거나 해당 지역에 소장중인 도서관이 없습니다<br/>
-            • 다른 키워드로 다시 검색해보세요<br/>
-            • 예: "해리포터", "무라카미 하루키", "자기계발" 등
+            도서 정보를 불러오는 중입니다
           </div>
         </EmptyState>
       )}
@@ -1431,9 +1279,9 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
                       <div>📍 {library.address}</div>
                       <div>📞 {library.phone}</div>
                       
-                      {/* 운영 시간 및 현재 상태 */}
+                      {/* 운영 시간 및 휴일 여부 */}
                       {(() => {
-                        const operatingStatus = getLibraryOperatingStatus(library.hours);
+                        const holidayStatus = getLibraryHolidayStatus(library.hours);
                         return (
                           <div style={{ 
                             display: 'flex', 
@@ -1442,28 +1290,32 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
                             marginBottom: '8px'
                           }}>
                             <span>🕐 {library.hours}</span>
-                            <span style={{
-                              padding: '2px 6px',
-                              borderRadius: '12px',
-                              fontSize: '11px',
-                              fontWeight: 'bold',
-                              backgroundColor: operatingStatus.isOpen ? '#e8f5e8' : '#ffe8e8',
-                              color: operatingStatus.isOpen ? '#2e7d32' : '#c62828',
-                              border: `1px solid ${operatingStatus.isOpen ? '#4caf50' : '#f44336'}`
-                            }}>
-                              {operatingStatus.status}
-                            </span>
-                            <span style={{
-                              fontSize: '11px',
-                              color: '#666'
-                            }}>
-                              {operatingStatus.reason}
-                            </span>
+                            {holidayStatus.isHoliday && (
+                              <span style={{
+                                padding: '2px 6px',
+                                borderRadius: '12px',
+                                fontSize: '11px',
+                                fontWeight: 'bold',
+                                backgroundColor: '#fff3cd',
+                                color: '#856404',
+                                border: '1px solid #ffeaa7'
+                              }}>
+                                🚫 휴무일
+                              </span>
+                            )}
+                            {holidayStatus.isHoliday && (
+                              <span style={{
+                                fontSize: '11px',
+                                color: '#666'
+                              }}>
+                                {holidayStatus.reason}
+                              </span>
+                            )}
                           </div>
                         );
                       })()}
                       
-                      {/* 소장 여부 - 실제 API 데이터 또는 기본값 */}
+                      {/* 소장 여부 - 실제 API 데이터 */}
                       <div style={{ 
                         marginTop: '8px', 
                         padding: '4px 8px', 
@@ -1482,16 +1334,18 @@ const BookSearchSection: React.FC<BookSearchSectionProps> = ({
                         )}
                       </div>
                       
-                      {/* 배가기호와 소장권수 정보 표시 */}
-                      <LocationInfo>
-                        <div className="location-title">📍 도서 위치 정보</div>
-                        <div className="location-detail">
-                          🏷️ <strong>배가기호:</strong> {library.shelfLocation || '위치 정보 없음'}
-                        </div>
-                        <div className="location-detail">
-                          📚 <strong>소장권수:</strong> {library.volumeCount && library.volumeCount > 0 ? `${library.volumeCount}권` : '정보 없음'}
-                        </div>
-                      </LocationInfo>
+                      {/* 배가기호와 소장권수 정보 표시 (소장중일 때만) */}
+                      {library.available && (
+                        <LocationInfo>
+                          <div className="location-title">📍 도서 위치 정보</div>
+                          <div className="location-detail">
+                            🏷️ <strong>배가기호:</strong> {library.shelfLocation && library.shelfLocation !== '위치 정보 없음' ? library.shelfLocation : '정보 없음'}
+                          </div>
+                          <div className="location-detail">
+                            📚 <strong>소장권수:</strong> {library.volumeCount && library.volumeCount > 0 ? `${library.volumeCount}권` : '정보 없음'}
+                          </div>
+                        </LocationInfo>
+                      )}
                       
                       <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
                         💡 배가기호로 도서관에서 책을 찾으실 수 있습니다

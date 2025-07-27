@@ -124,7 +124,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
   });
 
   // 인기 지역 버튼
-  const popularRegions = ['수원시', '성남시', '고양시', '용인시'];
+  const popularRegions = ['경기도', '수원시', '성남시', '고양시', '용인시', '안산시', '가평군'];
 
   // 지역별 더미 도서관 데이터 생성
   const generateDummyLibraries = (region: string) => {
